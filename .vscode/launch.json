@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-AutofeedApplication<autofeed>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kr.soft.autofeed.AutofeedApplication",
+            "projectName": "autofeed",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
