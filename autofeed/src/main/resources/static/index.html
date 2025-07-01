@@ -1,11 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>문장 분류기</title>
 </head>
 <body>
-    <h1>HELLO</h1>
+  <h1>📘 문장 분류기</h1>
+  <input type="text" id="sentence" placeholder="문장을 입력하세요" size="50">
+  <button onclick="classifyText()">분류하기</button>
+
+  <h2>📂 분류 결과: <span id="result">-</span></h2>
+
+  <script>
+    async function classifyText() {
+      const sentence = document.getElementById("sentence").value;
+
+      const response = await fetch("/api/classify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: sentence
+      });
+
+      const category = await response.text();
+      document.getElementById("result").innerText = category;
+    }
+  </script>
 </body>
 </html>

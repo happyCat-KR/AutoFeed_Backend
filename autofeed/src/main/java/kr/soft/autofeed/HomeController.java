@@ -1,12 +1,11 @@
-package kr.soft.autofeed.controller;
+package kr.soft.autofeed;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
-public class Main {
+public class HomeController {
     
     @GetMapping("/")
     public String home() {
