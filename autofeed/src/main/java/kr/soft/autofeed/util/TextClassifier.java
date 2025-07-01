@@ -1,11 +1,12 @@
-package kr.soft.autofeed.text_classifier;
+package kr.soft.autofeed.util;
 
 import java.util.*;
 
-import org.springframework.stereotype.Service;
 
-@Service
-public class TextClassifierService {
+/***
+ * 카테고리 구분 기능
+ */
+public class TextClassifier {
 
     private static final Map<String, List<String>> categories = new HashMap<>();
 
@@ -17,7 +18,10 @@ public class TextClassifierService {
         categories.put("쇼핑", Arrays.asList("쇼핑", "구매", "온라인쇼핑", "오프라인", "백화점", "마트", "할인", "세일", "쿠폰", "적립금"));
     }
 
-    public String classifyText(String sentence) {
+
+    
+
+    public static String classifyText(String sentence) {
         Map<String, Integer> scores = new HashMap<>();
 
         for (Map.Entry<String, List<String>> entry : categories.entrySet()) {
