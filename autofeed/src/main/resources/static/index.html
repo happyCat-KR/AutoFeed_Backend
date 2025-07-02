@@ -15,7 +15,7 @@
     async function classifyText() {
       const sentence = document.getElementById("sentence").value;
 
-      const response = await fetch("/api/classify", {
+      const response = await fetch("/api/user/classify", {
         method: "POST",
         headers: {
           "Content-Type": "text/plain"
