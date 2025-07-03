@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import kr.soft.autofeed.post.dto.PostRegistDTO;
+import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
+import kr.soft.autofeed.thread.service.ThreadService;
 import kr.soft.autofeed.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 
@@ -23,29 +24,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/post")
 @RequiredArgsConstructor
-public class PostController {
+public class ThreadController {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
+    final private ThreadService postService;
 
     @PostMapping(value = "/regist")
     public void postRegist(MultipartHttpServletRequest request) throws IOException{
         Long userIdx = Long.parseLong(request.getParameter("userIdx"));
         String content = request.getParameter("content");
+        if (content == null) content = "";
 
         String[] hashtagName = request.getParameterValues("hashtagName");
-        List<String> hashtagList = Arrays.asList(hashtagName);
+        List<String> hashtagList = (hashtagName != null) ? Arrays.asList(hashtagName) : List.of();
 
-        List<MultipartFile> file = request.getFiles("images");
+        List<MultipartFile> threadImages = request.getFiles("images");
 
-        PostRegistDTO postRegistDTO = new PostRegistDTO(userIdx, content, hashtagList);
+        ThreadRegistDTO threadRegistDTO = new ThreadRegistDTO(userIdx, content, hashtagList, threadImages);
 
-        List<String> savedImageUrls = FileUploadUtil.saveImages(file);
-
-        System.out.println("저장된 이미지들:");
-        for (String url : savedImageUrls) {
-            System.out.println(url);
-        }
-
-        System.out.println("게시글 내용: " + postRegistDTO.getContent());
+        postService.threadRegist(threadRegistDTO);
+        
     }
 }
