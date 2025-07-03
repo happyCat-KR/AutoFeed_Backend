@@ -2,6 +2,7 @@ package kr.soft.autofeed.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import kr.soft.autofeed.user.dto.UserLoginDTO;
@@ -29,17 +30,17 @@ public class UserController {
     }
 
     @PostMapping("/regist")
-    public ResponseData regist(@RequestBody UserRegistDTO userRegistDTO) {
+    public ResponseEntity<ResponseData> regist(@RequestBody UserRegistDTO userRegistDTO) {
         logger.info(userRegistDTO.toString());
-
-        return userService.regist(userRegistDTO);
+        ResponseData responseData = userService.regist(userRegistDTO);
+        return ResponseEntity.ok(responseData);
     }
 
     @PostMapping("/login")
-    public ResponseData login(@RequestBody UserLoginDTO userLoginDTO) {
+    public ResponseEntity<ResponseData> login(@RequestBody UserLoginDTO userLoginDTO) {
         logger.info(userLoginDTO.toString());
-        
-        return userService.login(userLoginDTO);
+        ResponseData responseData = userService.login(userLoginDTO);
+        return ResponseEntity.ok(responseData);
     }
     
 }
