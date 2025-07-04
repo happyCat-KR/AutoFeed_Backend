@@ -2,13 +2,12 @@ package kr.soft.autofeed.thread.service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import kr.soft.autofeed.domain.User;
-import kr.soft.autofeed.hastag.dao.HashtagRepository;
+import kr.soft.autofeed.hashtag.dao.HashtagRepository;
 import kr.soft.autofeed.ThreadHashtag.dao.ThreadHashtagRepository;
 import kr.soft.autofeed.domain.Hashtag;
 import kr.soft.autofeed.domain.Media;
@@ -54,7 +53,7 @@ public class ThreadService {
     }
 
 
-    
+    @Transactional    
     private Thread threadInsert(ThreadRegistDTO threadRegistDTO) {
         User user = userRepository.findById(threadRegistDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
@@ -67,6 +66,7 @@ public class ThreadService {
         return thread;
     }
 
+    @Transactional
     private Media mediaInsert(Thread savedThread, String url) {
         String extension = url.substring(url.lastIndexOf(".") + 1);
 
@@ -79,6 +79,7 @@ public class ThreadService {
         return media;
     }
 
+    @Transactional
     private ThreadHashtag threadHashtagInsert(Thread savedThread, String hashtagName){
 
         Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)

@@ -44,6 +44,7 @@ public class UserService {
         return ResponseData.success("회원가입성공");
     }
 
+    @Transactional
     public ResponseData login(UserLoginDTO userLoginDTO) {
 
         if (!userRepository.existsByEmailPhone(userLoginDTO.getInputId())) {
