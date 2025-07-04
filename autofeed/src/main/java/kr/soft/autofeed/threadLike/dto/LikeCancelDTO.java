@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LikeDeleteDTO {
+public class LikeCancelDTO {
     private Long userIdx;
     private Long threadIdx;
 }

@@ -9,7 +9,7 @@ import kr.soft.autofeed.domain.ThreadLike;
 import kr.soft.autofeed.domain.ThreadLikeId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
 import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
-import kr.soft.autofeed.threadLike.dto.LikeDeleteDTO;
+import kr.soft.autofeed.threadLike.dto.LikeCancelDTO;
 import kr.soft.autofeed.threadLike.dto.LikeRegistDTO;
 import kr.soft.autofeed.user.dao.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,18 +47,16 @@ public class ThreadLikeService {
                 .user(user)
                 .build());
 
-        
-
         threadLikeRepository.save(threadLike);
     }
 
     @Transactional
-    public void LikeDelete(LikeDeleteDTO likeDeleteDTO) {
+    public void LikeCancel(LikeCancelDTO likeCancelDTO) {
 
-        User user = userRepository.findById(likeDeleteDTO.getUserIdx())
+        User user = userRepository.findById(likeCancelDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
-        Thread thread = threadRepository.findById(likeDeleteDTO.getThreadIdx())
+        Thread thread = threadRepository.findById(likeCancelDTO.getThreadIdx())
                 .orElseThrow(() -> new IllegalArgumentException("해당 스레드가 존재하지 않습니다."));
 
         ThreadLikeId threadLikeId = new ThreadLikeId(thread.getThreadIdx(), user.getUserIdx());
