@@ -1,4 +1,4 @@
-package kr.soft.autofeed.post.dto;
+package kr.soft.autofeed.thread.dto;
 
 import java.util.Arrays;
 import java.util.List;

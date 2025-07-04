@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/api/post")
+@RequestMapping("/api/thread")
 @RequiredArgsConstructor
 public class ThreadController {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
-    final private ThreadService postService;
+    final private ThreadService threadService;
 
     @PostMapping(value = "/regist")
     public void postRegist(MultipartHttpServletRequest request) throws IOException{
@@ -42,7 +42,7 @@ public class ThreadController {
 
         ThreadRegistDTO threadRegistDTO = new ThreadRegistDTO(userIdx, content, hashtagList, threadImages);
 
-        postService.threadRegist(threadRegistDTO);
+        threadService.threadRegist(threadRegistDTO);
         
     }
 }

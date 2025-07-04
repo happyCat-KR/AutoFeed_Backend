@@ -2,11 +2,23 @@ package kr.soft.autofeed.thread.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import kr.soft.autofeed.domain.User;
+import kr.soft.autofeed.hastag.dao.HashtagRepository;
+import kr.soft.autofeed.ThreadHashtag.dao.ThreadHashtagRepository;
+import kr.soft.autofeed.domain.Hashtag;
+import kr.soft.autofeed.domain.Media;
+import kr.soft.autofeed.domain.Thread;
+import kr.soft.autofeed.domain.ThreadHashtag;
+import kr.soft.autofeed.domain.ThreadHashtagId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
+import kr.soft.autofeed.media.dao.MediaRepository;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
+import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 
@@ -15,23 +27,73 @@ import lombok.RequiredArgsConstructor;
 public class ThreadService {
 
     final private ThreadRepository threadRepository;
+    final private UserRepository userRepository;
+    final private MediaRepository mediaRepository;
+    final private HashtagRepository hashtagRepository;
+    final private ThreadHashtagRepository threadHashtagRepository;
 
-    public void threadRegist(ThreadRegistDTO threadRegistDTO){
-        Thread thread = new Thread();
-        
-        
-        threadRepository.save(null);
-        
-    }
-    
-    public void getImagesUrl(ThreadRegistDTO postRegistDTO) throws IOException{
-        List<String> savedImageUrls = FileUploadUtil.saveImages(postRegistDTO.getPostImages(), postRegistDTO.getUserIdx());
+    @Transactional
+    public void threadRegist(ThreadRegistDTO threadRegistDTO) throws IOException {
 
-        System.out.println("저장된 이미지들:");
+        // 1. thread 테이블 객체 생성 및 반환.
+        Thread savedThread = threadRepository.save(threadInsert(threadRegistDTO));
+
+        List<String> savedImageUrls = FileUploadUtil.saveImages(threadRegistDTO.getPostImages(),
+                threadRegistDTO.getUserIdx());
+
         for (String url : savedImageUrls) {
-            System.out.println(url);
+            // 2. media 테이블 객체 생성 및 반환
+            mediaRepository.save(mediaInsert(savedThread, url));
         }
 
-        System.out.println("게시글 내용: " + postRegistDTO.getContent());
+        for (String hashtagName : threadRegistDTO.getHashtagName()) {
+            //3. thread_hastag 테이블 객체 생성 및 반환
+            threadHashtagRepository.save(threadHashtagInsert(savedThread, hashtagName));
+        }
+
     }
+
+
+    
+    private Thread threadInsert(ThreadRegistDTO threadRegistDTO) {
+        User user = userRepository.findById(threadRegistDTO.getUserIdx())
+                .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
+
+        Thread thread = Thread.builder()
+                .user(user)
+                .content(threadRegistDTO.getContent())
+                .build();
+
+        return thread;
+    }
+
+    private Media mediaInsert(Thread savedThread, String url) {
+        String extension = url.substring(url.lastIndexOf(".") + 1);
+
+        Media media = Media.builder()
+                .thread(savedThread)
+                .fileUrl(url)
+                .fileType(extension)
+                .build();
+
+        return media;
+    }
+
+    private ThreadHashtag threadHashtagInsert(Thread savedThread, String hashtagName){
+
+        Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
+                    .orElseThrow(() -> new IllegalArgumentException("해쉬태그가 없습니다."));
+
+            ThreadHashtagId threadHashtagId = new ThreadHashtagId(
+                    savedThread.getThreadIdx(), hashtag.getHashtagIdx());
+
+            ThreadHashtag threadHashtag = ThreadHashtag.builder()
+                    .id(threadHashtagId)
+                    .thread(savedThread)
+                    .hashtag(hashtag)
+                    .build();
+
+        return threadHashtag;
+    }
+
 }
