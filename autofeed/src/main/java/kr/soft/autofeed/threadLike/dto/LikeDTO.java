@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LikeRegistDTO {
+public class LikeDTO {
     private Long userIdx;
     private Long threadIdx;
 }

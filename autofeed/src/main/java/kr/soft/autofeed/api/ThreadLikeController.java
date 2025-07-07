@@ -5,8 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.soft.autofeed.threadLike.dto.LikeCancelDTO;
-import kr.soft.autofeed.threadLike.dto.LikeRegistDTO;
+import kr.soft.autofeed.threadLike.dto.LikeDTO;
 import kr.soft.autofeed.threadLike.service.ThreadLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,12 +21,12 @@ public class ThreadLikeController {
     final private ThreadLikeService threadLikeService;
 
     @PostMapping("/regist")
-    public void LikeRegist(@RequestBody LikeRegistDTO likeRegistDTO){
+    public void LikeRegist(@RequestBody LikeDTO likeRegistDTO){
         threadLikeService.LikeRegist(likeRegistDTO);
     }
 
     @PostMapping("/cancel")
-    public void LikeCancel(@RequestBody LikeCancelDTO likeCancelDTO){
+    public void LikeCancel(@RequestBody LikeDTO likeCancelDTO){
         threadLikeService.LikeCancel(likeCancelDTO);
     }
 }

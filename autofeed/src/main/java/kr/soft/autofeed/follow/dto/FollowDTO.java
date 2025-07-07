@@ -1,4 +1,4 @@
-package kr.soft.autofeed.threadLike.dto;
+package kr.soft.autofeed.follow.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LikeCancelDTO {
-    private Long userIdx;
-    private Long threadIdx;
+public class FollowDTO {
+    private long followerIdx;
+    private long followingIdx;
 }
