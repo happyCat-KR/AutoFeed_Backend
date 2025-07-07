@@ -10,11 +10,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class FileUploadUtil {
 
     private static final Path UPLOAD_DIR = Paths.get("C:", "autofeed_image_folder", "thread_images");
+
+    private static final String URL_PREFIX = "/images/thread/";
 
     public static List<String> saveImages(List<MultipartFile> files, Long userIdx) throws IOException {
         List<String> savedUrls = new ArrayList<>();
@@ -48,7 +49,7 @@ public class FileUploadUtil {
 
                 file.transferTo(savedFile);
 
-                savedUrls.add("/static/images/" + savedFileName); // 접근용 URL
+                savedUrls.add(URL_PREFIX + savedFileName); // 접근용 URL
             }
         }
 

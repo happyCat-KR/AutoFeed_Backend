@@ -20,11 +20,13 @@ public class ThreadLikeController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadLikeService threadLikeService;
 
+    // 좋아요
     @PostMapping("/regist")
     public void LikeRegist(@RequestBody LikeDTO likeRegistDTO){
         threadLikeService.LikeRegist(likeRegistDTO);
     }
 
+    // 좋아요취소
     @PostMapping("/cancel")
     public void LikeCancel(@RequestBody LikeDTO likeCancelDTO){
         threadLikeService.LikeCancel(likeCancelDTO);

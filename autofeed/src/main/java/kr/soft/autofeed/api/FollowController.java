@@ -19,12 +19,13 @@ public class FollowController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     private final FollowService followService;
 
-
+    // 팔로우
     @PostMapping("/regist")
     public void followRegist(@RequestBody FollowDTO followRegistDTO){
         followService.followRegist(followRegistDTO);
     }
 
+    // 언팔로우
     @PostMapping("/cancel")
     public void followCancel(@RequestBody FollowDTO followCancelDTO){
         followService.followCancel(followCancelDTO);

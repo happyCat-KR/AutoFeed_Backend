@@ -29,6 +29,7 @@ public class ThreadController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadService threadService;
 
+    // 게시글 작성
     @PostMapping(value = "/regist")
     public void postRegist(MultipartHttpServletRequest request) throws IOException{
         Long userIdx = Long.parseLong(request.getParameter("userIdx"));
