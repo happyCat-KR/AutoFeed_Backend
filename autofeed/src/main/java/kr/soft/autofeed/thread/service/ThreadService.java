@@ -18,6 +18,7 @@ import kr.soft.autofeed.thread.dao.ThreadRepository;
 import kr.soft.autofeed.media.dao.MediaRepository;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
 import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
+import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
 import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.util.FileUploadUtil;
 import kr.soft.autofeed.util.ResponseData;
@@ -32,6 +33,27 @@ public class ThreadService {
     final private MediaRepository mediaRepository;
     final private HashtagRepository hashtagRepository;
     final private ThreadHashtagRepository threadHashtagRepository;
+    final private ThreadLikeRepository threadLikeRepository;
+
+
+    @Transactional
+    public ResponseData threadDelete(Long threadIdx){
+        Thread thread = threadRepository.findById(threadIdx)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+
+        thread.setDelCheck(true);
+
+        threadHashtagRepository.findAllByThreadThreadIdx(threadIdx)
+            .forEach(threadHashtag -> threadHashtag.setDelCheck(true));
+
+        mediaRepository.findAllByThreadThreadIdx(threadIdx)
+            .forEach(media -> media.setDelCheck(true));
+
+        threadLikeRepository.findAllByThreadThreadIdx(threadIdx)
+            .forEach(threadLike -> threadLike.setDelCheck(true));
+
+        return ResponseData.success();
+    }
 
     @Transactional
     public ResponseData threadUpdate(ThreadUpdateDTO threadUpdateDTO) throws IOException{

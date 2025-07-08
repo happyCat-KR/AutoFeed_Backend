@@ -1,6 +1,7 @@
 package kr.soft.autofeed.api;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,6 +70,13 @@ public class ThreadController {
         ThreadUpdateDTO threadUpdateDTO = new ThreadUpdateDTO(threadIdx, content, hashtagList, threadImages);
 
         ResponseData responseData = threadService.threadUpdate(threadUpdateDTO);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/delete")    
+    public ResponseEntity<ResponseData> threadDelete(@RequestParam("threadIdx") Long threadIdx){
+        ResponseData responseData = threadService.threadDelete(threadIdx);
+
         return ResponseEntity.ok(responseData);
     }
 }
