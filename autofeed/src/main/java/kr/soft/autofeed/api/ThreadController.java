@@ -33,20 +33,25 @@ public class ThreadController {
 
     // 게시글 작성
     @PostMapping(value = "/regist")
-    public ResponseEntity<ResponseData> postRegist(MultipartHttpServletRequest request) throws IOException{
+    public ResponseEntity<ResponseData> postRegist(MultipartHttpServletRequest request) throws IOException {
         Long userIdx = Long.parseLong(request.getParameter("userIdx"));
+
+        String parentIdxStr = request.getParameter("parentIdx");
+        Long parentIdx = (parentIdxStr != null && !parentIdxStr.isBlank()) ? Long.parseLong(parentIdxStr) : null;
+
         String content = request.getParameter("content");
-        if (content == null) content = "";
+        if (content == null)
+            content = "";
 
         String[] hashtagName = request.getParameterValues("hashtagName");
         List<String> hashtagList = (hashtagName != null) ? Arrays.asList(hashtagName) : List.of();
 
         List<MultipartFile> threadImages = request.getFiles("images");
 
-        ThreadRegistDTO threadRegistDTO = new ThreadRegistDTO(userIdx, content, hashtagList, threadImages);
+        ThreadRegistDTO threadRegistDTO = new ThreadRegistDTO(userIdx, parentIdx, content, hashtagList, threadImages);
 
         ResponseData responseData = threadService.threadRegist(threadRegistDTO);
-        
+
         return ResponseEntity.ok(responseData);
     }
 }

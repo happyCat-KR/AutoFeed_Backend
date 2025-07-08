@@ -61,9 +61,16 @@ public class ThreadService {
         User user = userRepository.findById(threadRegistDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 
+        Thread parentThread = null;
+        if(threadRegistDTO.getParentIdx() != null){
+            parentThread = threadRepository.findById(threadRegistDTO.getParentIdx())
+                    .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
+        }
+
         Thread thread = Thread.builder()
                 .user(user)
                 .content(threadRegistDTO.getContent())
+                .parentThread(parentThread)
                 .build();
 
         return thread;

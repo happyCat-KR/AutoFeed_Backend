@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ThreadRegistDTO {
-    private long userIdx;
+    private Long userIdx;
+    private Long parentIdx;
     private String content;
     private List<String> hashtagName;
     private List<MultipartFile> postImages; 
