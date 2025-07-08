@@ -17,6 +17,7 @@ import kr.soft.autofeed.domain.ThreadHashtagId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
 import kr.soft.autofeed.media.dao.MediaRepository;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
+import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
 import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.util.FileUploadUtil;
 import kr.soft.autofeed.util.ResponseData;
@@ -31,6 +32,51 @@ public class ThreadService {
     final private MediaRepository mediaRepository;
     final private HashtagRepository hashtagRepository;
     final private ThreadHashtagRepository threadHashtagRepository;
+
+    @Transactional
+    public ResponseData threadUpdate(ThreadUpdateDTO threadUpdateDTO) throws IOException{
+        Thread thread = threadRepository.findById(threadUpdateDTO.getThreadIdx())
+                .orElseThrow(() -> new IllegalArgumentException("해당 스레드가 존재하지 않습니다."));
+        
+        thread.setContent(threadUpdateDTO.getContent());
+
+        threadHashtagRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
+                .forEach(relation -> relation.setDelCheck(true));
+        
+        if(threadUpdateDTO.getHashtagName() != null){
+            for(String hashtagName : threadUpdateDTO.getHashtagName()){
+                Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 해쉬태그가 없습니다."));
+
+                ThreadHashtagId threadHashtagId = new ThreadHashtagId(thread.getThreadIdx(), hashtag.getHashtagIdx());
+
+                ThreadHashtag threadHashtag = threadHashtagRepository.findById(threadHashtagId)
+                        .map(existing -> {
+                            existing.setDelCheck(false);
+                            return existing;
+                        })
+                        .orElseGet(() -> ThreadHashtag.builder()
+                                .id(threadHashtagId)
+                                .thread(thread)
+                                .hashtag(hashtag)
+                                .build());
+
+                threadHashtagRepository.save(threadHashtag);
+            }
+        }
+
+        mediaRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
+                .forEach(media -> media.setDelCheck(true));
+        
+        List<String> savedUrls = FileUploadUtil.saveImages(threadUpdateDTO.getThreadImages(), thread.getUser().getUserIdx());
+
+        for(String url : savedUrls){
+            mediaRepository.save(mediaInsert(thread, url));
+        }
+
+
+        return ResponseData.success();
+    }
 
     @Transactional
     public ResponseData threadRegist(ThreadRegistDTO threadRegistDTO) throws IOException {

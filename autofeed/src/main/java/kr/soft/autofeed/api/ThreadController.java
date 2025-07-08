@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
+import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
 import kr.soft.autofeed.thread.service.ThreadService;
 import kr.soft.autofeed.util.FileUploadUtil;
 import kr.soft.autofeed.util.ResponseData;
@@ -52,6 +53,22 @@ public class ThreadController {
 
         ResponseData responseData = threadService.threadRegist(threadRegistDTO);
 
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<ResponseData> threadUpdate(MultipartHttpServletRequest request) throws IOException{
+        Long threadIdx = Long.valueOf(request.getParameter("threadIdx"));
+        String content = request.getParameter("content");
+
+        String[] hashtagName = request.getParameterValues("hashtagName");
+        List<String> hashtagList = (hashtagName != null) ? Arrays.asList(hashtagName) : List.of();
+
+        List<MultipartFile> threadImages = request.getFiles("threadImages");
+
+        ThreadUpdateDTO threadUpdateDTO = new ThreadUpdateDTO(threadIdx, content, hashtagList, threadImages);
+
+        ResponseData responseData = threadService.threadUpdate(threadUpdateDTO);
         return ResponseEntity.ok(responseData);
     }
 }
