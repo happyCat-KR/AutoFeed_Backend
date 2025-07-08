@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.soft.autofeed.threadLike.dto.LikeDTO;
 import kr.soft.autofeed.threadLike.service.ThreadLikeService;
+import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -22,13 +25,17 @@ public class ThreadLikeController {
 
     // 좋아요
     @PostMapping("/regist")
-    public void LikeRegist(@RequestBody LikeDTO likeRegistDTO){
-        threadLikeService.LikeRegist(likeRegistDTO);
+    public ResponseEntity<ResponseData> LikeRegist(@RequestBody LikeDTO likeRegistDTO){
+        ResponseData responseData = threadLikeService.LikeRegist(likeRegistDTO);
+    
+        return ResponseEntity.ok(responseData);
     }
 
     // 좋아요취소
     @PostMapping("/cancel")
-    public void LikeCancel(@RequestBody LikeDTO likeCancelDTO){
-        threadLikeService.LikeCancel(likeCancelDTO);
+    public ResponseEntity<ResponseData> LikeCancel(@RequestBody LikeDTO likeCancelDTO){
+        ResponseData responseData = threadLikeService.LikeCancel(likeCancelDTO);
+
+        return ResponseEntity.ok(responseData);
     }
 }

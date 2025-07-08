@@ -17,6 +17,6 @@ public class UserProfileUpdateDTO {
     private String userId;
     private String bio;
     private List<String> hashtagName;
-    private boolean privateCheck;
+    private Boolean privateCheck;
     private MultipartFile profileImage;
 }

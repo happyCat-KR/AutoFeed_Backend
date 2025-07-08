@@ -20,6 +20,10 @@ public class ResponseData<T> {
     private T data;
 
     // ✅ 성공 응답
+    public static <T> ResponseData<T> success() {
+        return new ResponseData<>(200, "성공", null);
+    }
+
     public static <T> ResponseData<T> success(T data) {
         return new ResponseData<>(200, "성공", data);
     }

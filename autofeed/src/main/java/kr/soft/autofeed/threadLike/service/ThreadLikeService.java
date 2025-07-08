@@ -11,6 +11,7 @@ import kr.soft.autofeed.thread.dao.ThreadRepository;
 import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
 import kr.soft.autofeed.threadLike.dto.LikeDTO;
 import kr.soft.autofeed.user.dao.UserRepository;
+import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,7 +23,7 @@ public class ThreadLikeService {
     private final ThreadRepository threadRepository;
 
     @Transactional
-    public void LikeRegist(LikeDTO likeRegistDTO) {
+    public ResponseData LikeRegist(LikeDTO likeRegistDTO) {
         User user = userRepository.findById(likeRegistDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
@@ -47,10 +48,12 @@ public class ThreadLikeService {
                 .build());
 
         threadLikeRepository.save(threadLike);
+
+        return ResponseData.success();
     }
 
     @Transactional
-    public void LikeCancel(LikeDTO likeCancelDTO) {
+    public ResponseData LikeCancel(LikeDTO likeCancelDTO) {
 
         User user = userRepository.findById(likeCancelDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
@@ -68,6 +71,8 @@ public class ThreadLikeService {
         }
 
         threadLike.setDelCheck(true);
+
+        return ResponseData.success();
 
     }
 

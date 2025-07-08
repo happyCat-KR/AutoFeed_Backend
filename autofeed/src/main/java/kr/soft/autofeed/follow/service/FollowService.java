@@ -9,6 +9,7 @@ import kr.soft.autofeed.domain.User;
 import kr.soft.autofeed.follow.dao.FollowRepository;
 import kr.soft.autofeed.follow.dto.FollowDTO;
 import kr.soft.autofeed.user.dao.UserRepository;
+import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,7 +20,7 @@ public class FollowService {
     private final FollowRepository followRepository;
 
     @Transactional
-    public void followRegist(FollowDTO followRegistDTO){
+    public ResponseData followRegist(FollowDTO followRegistDTO){
         User follower = userRepository.findById(followRegistDTO.getFollowerIdx())
                 .orElseThrow(() -> new IllegalArgumentException("팔로우 요청 유저가 존재하지 않습니다."));
 
@@ -41,10 +42,12 @@ public class FollowService {
                 .build());
 
         followRepository.save(follow);
+
+        return ResponseData.success();
     }
 
     @Transactional
-    public void followCancel(FollowDTO followCancelDTO){
+    public ResponseData followCancel(FollowDTO followCancelDTO){
 
         FollowId followId = new FollowId(followCancelDTO.getFollowerIdx(), followCancelDTO.getFollowingIdx());
 
@@ -56,6 +59,8 @@ public class FollowService {
         }
 
         follow.setDelCheck(true);
+
+        return ResponseData.success();
     }
 
 }

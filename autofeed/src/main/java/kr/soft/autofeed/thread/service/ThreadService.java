@@ -19,6 +19,7 @@ import kr.soft.autofeed.media.dao.MediaRepository;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
 import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.util.FileUploadUtil;
+import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,7 +33,7 @@ public class ThreadService {
     final private ThreadHashtagRepository threadHashtagRepository;
 
     @Transactional
-    public void threadRegist(ThreadRegistDTO threadRegistDTO) throws IOException {
+    public ResponseData threadRegist(ThreadRegistDTO threadRegistDTO) throws IOException {
 
         // 1. thread 테이블 객체 생성 및 반환.
         Thread savedThread = threadRepository.save(threadInsert(threadRegistDTO));
@@ -49,6 +50,8 @@ public class ThreadService {
             //3. thread_hastag 테이블 객체 생성 및 반환
             threadHashtagRepository.save(threadHashtagInsert(savedThread, hashtagName));
         }
+
+        return ResponseData.success();
 
     }
 

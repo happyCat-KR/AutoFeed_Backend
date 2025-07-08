@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
 import kr.soft.autofeed.thread.service.ThreadService;
 import kr.soft.autofeed.util.FileUploadUtil;
+import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -31,7 +33,7 @@ public class ThreadController {
 
     // 게시글 작성
     @PostMapping(value = "/regist")
-    public void postRegist(MultipartHttpServletRequest request) throws IOException{
+    public ResponseEntity<ResponseData> postRegist(MultipartHttpServletRequest request) throws IOException{
         Long userIdx = Long.parseLong(request.getParameter("userIdx"));
         String content = request.getParameter("content");
         if (content == null) content = "";
@@ -43,7 +45,8 @@ public class ThreadController {
 
         ThreadRegistDTO threadRegistDTO = new ThreadRegistDTO(userIdx, content, hashtagList, threadImages);
 
-        threadService.threadRegist(threadRegistDTO);
+        ResponseData responseData = threadService.threadRegist(threadRegistDTO);
         
+        return ResponseEntity.ok(responseData);
     }
 }

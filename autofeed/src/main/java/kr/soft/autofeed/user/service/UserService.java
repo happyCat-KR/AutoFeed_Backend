@@ -1,7 +1,6 @@
 package kr.soft.autofeed.user.service;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +32,25 @@ public class UserService {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    // 이메일 or 전화번호 중복체크
+    @Transactional
+    public ResponseData emailPhoneCheck(String inputEmailPhone){
+        if(userRepository.existsByEmailPhone(inputEmailPhone)){
+          return ResponseData.error(400, "이미 등록된 이메일 또는 전화번호입니다.");  
+        } 
+        return ResponseData.success();
+    }
+
+    // id 중복체크
+    @Transactional
+    public ResponseData userIdCheck(String inputUserId){
+        if(userRepository.existsByUserId(inputUserId)){
+            return ResponseData.error(400, "이미 사용 중인 사용자 ID입니다.");
+        }
+
+        return ResponseData.success();
+    }
+
     @Transactional
     public ResponseData regist(UserRegistDTO userRegistDTO) {
 
@@ -53,7 +71,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return ResponseData.success("회원가입성공");
+        return ResponseData.success();
     }
 
     @Transactional
@@ -70,12 +88,12 @@ public class UserService {
             return ResponseData.error(400, "비밀번호가 서로 다름!");
         }
 
-        return ResponseData.success("로그인 성공!");
+        return ResponseData.success();
 
     }
 
     @Transactional
-    public void accountUpdate(UserAccountUpdateDTO userAccountUpdateDTO) {
+    public ResponseData accountUpdate(UserAccountUpdateDTO userAccountUpdateDTO) {
         User user = userRepository.findById(userAccountUpdateDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("업데이트할 유저가 존재하지 않습니다."));
 
@@ -97,10 +115,12 @@ public class UserService {
             user.setUserName(userAccountUpdateDTO.getUserName());
         }
 
+        return ResponseData.success();
+
     }
 
     @Transactional
-    public void profileUpdate(UserProfileUpdateDTO userProfileUpdateDTO) throws IOException {
+    public ResponseData profileUpdate(UserProfileUpdateDTO userProfileUpdateDTO) throws IOException {
         User user = userRepository.findById(userProfileUpdateDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("업데이트할 유저가 존재하지 않습니다."));
 
@@ -114,7 +134,10 @@ public class UserService {
             user.setUserId(userProfileUpdateDTO.getUserId());
         }
         user.setBio(userProfileUpdateDTO.getBio());
-        user.setPrivateCheck(userProfileUpdateDTO.isPrivateCheck());
+        
+        if(userProfileUpdateDTO.getPrivateCheck() != null){
+            user.setPrivateCheck(userProfileUpdateDTO.getPrivateCheck().booleanValue());
+        }
 
         if (userProfileUpdateDTO.getProfileImage() != null &&
                 !userProfileUpdateDTO.getProfileImage().isEmpty()) {
@@ -122,6 +145,8 @@ public class UserService {
             String userProfileUrl = UserProfileUtil.saveImage(userProfileUpdateDTO.getProfileImage(),
                     userProfileUpdateDTO.getUserIdx());
             user.setProfileImage(userProfileUrl);
+        } else {
+            user.setProfileImage("http://blog.naver.com/yomyi00/222556494236");
         }
 
         // 기존 해시태그 전부 soft delete
@@ -149,6 +174,7 @@ public class UserService {
 
             }
         }
+        return ResponseData.success();
 
     }
 }

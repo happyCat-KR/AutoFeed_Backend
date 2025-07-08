@@ -20,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/user")
@@ -31,8 +34,21 @@ public class UserController {
 
     // 문장단어 추출 및 카테고리 분류
     @PostMapping("/classify")
-    public String classify(@RequestBody String sentence) {
-        return TextClassifier.classifyText(sentence);
+    public ResponseEntity<ResponseData> classify(@RequestBody String sentence) {
+        ResponseData responseData = TextClassifier.classifyText(sentence);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/check/email-phone")
+    public ResponseEntity<ResponseData> emailPhoneCheck(@RequestParam("inputEmailPhone") String inputEmailPhone){
+        ResponseData responseData = userService.emailPhoneCheck(inputEmailPhone);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/check/id")
+    public ResponseEntity<ResponseData> userIdCheck(@RequestParam("inputUserId") String inputUserId){
+        ResponseData responseData = userService.userIdCheck(inputUserId);
+        return ResponseEntity.ok(responseData);
     }
 
     // 회원가입
@@ -52,12 +68,13 @@ public class UserController {
     }
 
     @PostMapping("/update/account")
-    public void accountUpdate(@RequestBody UserAccountUpdateDTO userAccountUpdateDTO) {
-        userService.accountUpdate(userAccountUpdateDTO);
+    public ResponseEntity<ResponseData> accountUpdate(@RequestBody UserAccountUpdateDTO userAccountUpdateDTO) {
+        ResponseData responseData = userService.accountUpdate(userAccountUpdateDTO);
+        return ResponseEntity.ok(responseData);
     }
 
     @PostMapping("/update/profile")
-    public void profileUpdate(MultipartHttpServletRequest request) throws IOException{
+    public ResponseEntity<ResponseData> profileUpdate(MultipartHttpServletRequest request) throws IOException{
         Long userIdx = Long.parseLong(request.getParameter("userIdx"));
         String userId = request.getParameter("userId");
         String bio = request.getParameter("bio");
@@ -65,11 +82,18 @@ public class UserController {
         String[] hashtagName = request.getParameterValues("hashtagName");
         List<String> hashtagList = (hashtagName != null) ? Arrays.asList(hashtagName) : List.of();
 
-        boolean privateCheck = Boolean.parseBoolean(request.getParameter("privateCheck"));
+        String privateCheckStr = request.getParameter("privateCheck");
+        Boolean privateCheck = null;
+        if(privateCheckStr != null){
+            privateCheck = Boolean.valueOf(privateCheckStr);
+        }
+
         MultipartFile profileImage = request.getFile("profileImage");
 
         UserProfileUpdateDTO userProfileUpdateDTO = new UserProfileUpdateDTO(userIdx, userId, bio, hashtagList, privateCheck, profileImage);
 
-        userService.profileUpdate(userProfileUpdateDTO);
+        ResponseData responseData = userService.profileUpdate(userProfileUpdateDTO);
+
+        return ResponseEntity.ok(responseData);
     }
 }

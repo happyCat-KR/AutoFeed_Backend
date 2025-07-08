@@ -21,7 +21,7 @@ public class TextClassifier {
 
     
 
-    public static String classifyText(String sentence) {
+    public static ResponseData classifyText(String sentence) {
         Map<String, Integer> scores = new HashMap<>();
 
         for (Map.Entry<String, List<String>> entry : categories.entrySet()) {
@@ -45,6 +45,6 @@ public class TextClassifier {
             }
         }
 
-        return maxScore == 0 ? "분류불가" : bestCategory;
+        return maxScore == 0 ? ResponseData.error(400, "분류불가") : ResponseData.success(bestCategory);
     }
 }
