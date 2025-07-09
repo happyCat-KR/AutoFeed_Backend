@@ -20,9 +20,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @RestController
 @RequestMapping("/api/user")
@@ -39,14 +36,21 @@ public class UserController {
         return ResponseEntity.ok(responseData);
     }
 
+    @PostMapping("/restore")
+    public ResponseEntity<ResponseData> threadRestore(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.restore(userIdx);
+
+        return ResponseEntity.ok(responseData);
+    }
+
     @GetMapping("/check/email-phone")
-    public ResponseEntity<ResponseData> emailPhoneCheck(@RequestParam("inputEmailPhone") String inputEmailPhone){
+    public ResponseEntity<ResponseData> emailPhoneCheck(@RequestParam("inputEmailPhone") String inputEmailPhone) {
         ResponseData responseData = userService.emailPhoneCheck(inputEmailPhone);
         return ResponseEntity.ok(responseData);
     }
 
     @GetMapping("/check/id")
-    public ResponseEntity<ResponseData> userIdCheck(@RequestParam("inputUserId") String inputUserId){
+    public ResponseEntity<ResponseData> userIdCheck(@RequestParam("inputUserId") String inputUserId) {
         ResponseData responseData = userService.userIdCheck(inputUserId);
         return ResponseEntity.ok(responseData);
     }
@@ -68,7 +72,7 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<ResponseData> delete(@RequestParam("userIdx") Long userIdx){
+    public ResponseEntity<ResponseData> delete(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.delete(userIdx);
 
         return ResponseEntity.ok(responseData);
@@ -81,7 +85,7 @@ public class UserController {
     }
 
     @PostMapping("/update/profile")
-    public ResponseEntity<ResponseData> profileUpdate(MultipartHttpServletRequest request) throws IOException{
+    public ResponseEntity<ResponseData> profileUpdate(MultipartHttpServletRequest request) throws IOException {
         Long userIdx = Long.parseLong(request.getParameter("userIdx"));
         String userId = request.getParameter("userId");
         String bio = request.getParameter("bio");
@@ -91,13 +95,14 @@ public class UserController {
 
         String privateCheckStr = request.getParameter("privateCheck");
         Boolean privateCheck = null;
-        if(privateCheckStr != null){
+        if (privateCheckStr != null) {
             privateCheck = Boolean.valueOf(privateCheckStr);
         }
 
         MultipartFile profileImage = request.getFile("profileImage");
 
-        UserProfileUpdateDTO userProfileUpdateDTO = new UserProfileUpdateDTO(userIdx, userId, bio, hashtagList, privateCheck, profileImage);
+        UserProfileUpdateDTO userProfileUpdateDTO = new UserProfileUpdateDTO(userIdx, userId, bio, hashtagList,
+                privateCheck, profileImage);
 
         ResponseData responseData = userService.profileUpdate(userProfileUpdateDTO);
 

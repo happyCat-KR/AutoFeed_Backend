@@ -1,10 +1,13 @@
 package kr.soft.autofeed.user.service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -42,19 +45,48 @@ public class UserService {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Transactional
+    @Scheduled(cron = "0 * * * * *")
+    public void userCleanInsert() {
+        LocalDateTime twoHoursAgo = LocalDateTime.now().minusMinutes(2);
+        List<User> users = userRepository.findAllForCleanup(twoHoursAgo);
+
+        for (User user : users) {
+            user.setUserName("탈퇴한 사용자");
+            user.setEmailPhone("deleted_" + UUID.randomUUID().toString());
+            user.setUserId("deleted_user_" + UUID.randomUUID().toString());
+            user.setPassword("");
+            user.setBio(null);
+
+            userHashtagRepository.findAllByUserUserIdx(user.getUserIdx())
+                    .forEach(delHashtag -> delHashtag.setDelCheck(true));
+
+            followRepository.findAllByFollowerUserIdx(user.getUserIdx())
+                    .forEach(follower -> follower.setDelCheck(true));
+
+            followRepository.findAllByFollowingUserIdx(user.getUserIdx())
+                    .forEach(following -> following.setDelCheck(true));
+
+            threadLikeRepository.findAllByUserUserIdx(user.getUserIdx())
+                    .forEach(like -> like.setDelCheck(true));
+
+
+        }
+    }
+
     // 이메일 or 전화번호 중복체크
     @Transactional
-    public ResponseData emailPhoneCheck(String inputEmailPhone){
-        if(userRepository.existsByEmailPhone(inputEmailPhone)){
-          return ResponseData.error(400, "이미 등록된 이메일 또는 전화번호입니다.");  
-        } 
+    public ResponseData emailPhoneCheck(String inputEmailPhone) {
+        if (userRepository.existsByEmailPhone(inputEmailPhone)) {
+            return ResponseData.error(400, "이미 등록된 이메일 또는 전화번호입니다.");
+        }
         return ResponseData.success();
     }
 
     // id 중복체크
     @Transactional
-    public ResponseData userIdCheck(String inputUserId){
-        if(userRepository.existsByUserId(inputUserId)){
+    public ResponseData userIdCheck(String inputUserId) {
+        if (userRepository.existsByUserId(inputUserId)) {
             return ResponseData.error(400, "이미 사용 중인 사용자 ID입니다.");
         }
 
@@ -62,26 +94,29 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseData delete(Long userIdx){
+    public ResponseData delete(Long userIdx) {
         User user = userRepository.findById(userIdx)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
         user.setDelCheck(true);
         user.setDelUser(user);
-
-        userHashtagRepository.findAllByUserUserIdx(userIdx)
-            .forEach(delHashtag -> delHashtag.setDelCheck(true));
-
-        followRepository.findAllByFollowerUserIdx(userIdx)
-            .forEach(follower -> follower.setDelCheck(true));
-
-        followRepository.findAllByFollowingUserIdx(userIdx)
-            .forEach(following -> following.setDelCheck(true));
-
-        threadLikeRepository.findAllByUserUserIdx(userIdx)
-            .forEach(like -> like.setDelCheck(true));
+        user.setDeletedAt(LocalDateTime.now());
 
         threadRepository.findAllByUserUserIdx(userIdx)
                 .forEach(thread -> threadService.threadDelete(thread.getThreadIdx()));
+
+        return ResponseData.success();
+    }
+
+    @Transactional
+    public ResponseData restore(Long userIdx) {
+        User user = userRepository.findById(userIdx)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+        user.setDelCheck(false);
+        user.setDelUser(null);
+        user.setDeletedAt(null);
+
+        threadRepository.findAllByUserUserIdx(userIdx)
+                .forEach(thread -> threadService.threadRestore(thread.getThreadIdx()));
 
         return ResponseData.success();
     }
@@ -112,18 +147,18 @@ public class UserService {
     @Transactional
     public ResponseData login(UserLoginDTO userLoginDTO) {
 
-        if (!userRepository.existsByEmailPhone(userLoginDTO.getInputId())) {
+        return userRepository.findByEmailPhone(userLoginDTO.getInputId())
+                .map(user -> {
+                    if (!user.getPassword().equals(userLoginDTO.getInputPw())) {
+                        return ResponseData.error(400, "비밀번호가 서로 다름!");
+                    }
+                    if (user.getDelCheck()) {
+                        return ResponseData.error(400, "탈퇴한 회원입니다.");
+                    }
 
-            return ResponseData.error(400, "아이디가 존재하지 않음!");
-        }
-
-        String userPw = userRepository.findPasswordByEmailPhone(userLoginDTO.getInputId());
-
-        if (!userPw.equals(userLoginDTO.getInputPw())) {
-            return ResponseData.error(400, "비밀번호가 서로 다름!");
-        }
-
-        return ResponseData.success();
+                    return ResponseData.success();
+                })
+                .orElse(ResponseData.error(400, "아이디가 존재하지 않습니다."));
 
     }
 
@@ -169,8 +204,8 @@ public class UserService {
             user.setUserId(userProfileUpdateDTO.getUserId());
         }
         user.setBio(userProfileUpdateDTO.getBio());
-        
-        if(userProfileUpdateDTO.getPrivateCheck() != null){
+
+        if (userProfileUpdateDTO.getPrivateCheck() != null) {
             user.setPrivateCheck(userProfileUpdateDTO.getPrivateCheck().booleanValue());
         }
 

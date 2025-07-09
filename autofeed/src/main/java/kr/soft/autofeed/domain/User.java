@@ -51,6 +51,9 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(name = "alert1", length = 255)
     private String alert1;
 
