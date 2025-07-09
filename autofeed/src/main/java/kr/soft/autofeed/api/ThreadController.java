@@ -57,22 +57,6 @@ public class ThreadController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<ResponseData> threadUpdate(MultipartHttpServletRequest request) throws IOException{
-        Long threadIdx = Long.valueOf(request.getParameter("threadIdx"));
-        String content = request.getParameter("content");
-
-        String[] hashtagName = request.getParameterValues("hashtagName");
-        List<String> hashtagList = (hashtagName != null) ? Arrays.asList(hashtagName) : List.of();
-
-        List<MultipartFile> threadImages = request.getFiles("threadImages");
-
-        ThreadUpdateDTO threadUpdateDTO = new ThreadUpdateDTO(threadIdx, content, hashtagList, threadImages);
-
-        ResponseData responseData = threadService.threadUpdate(threadUpdateDTO);
-        return ResponseEntity.ok(responseData);
-    }
-
     @PostMapping("/delete")    
     public ResponseEntity<ResponseData> threadDelete(@RequestParam("threadIdx") Long threadIdx){
         ResponseData responseData = threadService.threadDelete(threadIdx);

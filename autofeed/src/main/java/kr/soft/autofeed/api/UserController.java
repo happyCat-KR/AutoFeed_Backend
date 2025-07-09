@@ -67,6 +67,13 @@ public class UserController {
         return ResponseEntity.ok(responseData);
     }
 
+    @PostMapping("/delete")
+    public ResponseEntity<ResponseData> delete(@RequestParam("userIdx") Long userIdx){
+        ResponseData responseData = userService.delete(userIdx);
+
+        return ResponseEntity.ok(responseData);
+    }
+
     @PostMapping("/update/account")
     public ResponseEntity<ResponseData> accountUpdate(@RequestBody UserAccountUpdateDTO userAccountUpdateDTO) {
         ResponseData responseData = userService.accountUpdate(userAccountUpdateDTO);

@@ -12,4 +12,5 @@ import kr.soft.autofeed.domain.ThreadLikeId;
 public interface ThreadLikeRepository extends JpaRepository<ThreadLike, ThreadLikeId>{
     boolean existsByThreadLikeIdAndDelCheckFalse(ThreadLikeId id);
     List<ThreadLike> findAllByThreadThreadIdx(Long threadIdx);
+    List<ThreadLike> findAllByUserUserIdx(Long userIdx);
 }

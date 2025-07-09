@@ -42,6 +42,7 @@ public class ThreadService {
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
         thread.setDelCheck(true);
+        thread.setDeletedBy(thread.getUser());
 
         threadHashtagRepository.findAllByThreadThreadIdx(threadIdx)
             .forEach(threadHashtag -> threadHashtag.setDelCheck(true));
@@ -51,51 +52,6 @@ public class ThreadService {
 
         threadLikeRepository.findAllByThreadThreadIdx(threadIdx)
             .forEach(threadLike -> threadLike.setDelCheck(true));
-
-        return ResponseData.success();
-    }
-
-    @Transactional
-    public ResponseData threadUpdate(ThreadUpdateDTO threadUpdateDTO) throws IOException{
-        Thread thread = threadRepository.findById(threadUpdateDTO.getThreadIdx())
-                .orElseThrow(() -> new IllegalArgumentException("해당 스레드가 존재하지 않습니다."));
-        
-        thread.setContent(threadUpdateDTO.getContent());
-
-        threadHashtagRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
-                .forEach(relation -> relation.setDelCheck(true));
-        
-        if(threadUpdateDTO.getHashtagName() != null){
-            for(String hashtagName : threadUpdateDTO.getHashtagName()){
-                Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
-                        .orElseThrow(() -> new IllegalArgumentException("해당 해쉬태그가 없습니다."));
-
-                ThreadHashtagId threadHashtagId = new ThreadHashtagId(thread.getThreadIdx(), hashtag.getHashtagIdx());
-
-                ThreadHashtag threadHashtag = threadHashtagRepository.findById(threadHashtagId)
-                        .map(existing -> {
-                            existing.setDelCheck(false);
-                            return existing;
-                        })
-                        .orElseGet(() -> ThreadHashtag.builder()
-                                .id(threadHashtagId)
-                                .thread(thread)
-                                .hashtag(hashtag)
-                                .build());
-
-                threadHashtagRepository.save(threadHashtag);
-            }
-        }
-
-        mediaRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
-                .forEach(media -> media.setDelCheck(true));
-        
-        List<String> savedUrls = FileUploadUtil.saveImages(threadUpdateDTO.getThreadImages(), thread.getUser().getUserIdx());
-
-        for(String url : savedUrls){
-            mediaRepository.save(mediaInsert(thread, url));
-        }
-
 
         return ResponseData.success();
     }

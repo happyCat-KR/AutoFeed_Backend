@@ -1,6 +1,7 @@
 package kr.soft.autofeed.user.service;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +11,14 @@ import jakarta.transaction.Transactional;
 import kr.soft.autofeed.UserHashtag.dao.UserHashtagRepository;
 import kr.soft.autofeed.domain.Hashtag;
 import kr.soft.autofeed.domain.User;
+import kr.soft.autofeed.domain.Thread;
 import kr.soft.autofeed.domain.UserHashtag;
 import kr.soft.autofeed.domain.UserHashtagId;
+import kr.soft.autofeed.follow.dao.FollowRepository;
 import kr.soft.autofeed.hashtag.dao.HashtagRepository;
+import kr.soft.autofeed.thread.dao.ThreadRepository;
+import kr.soft.autofeed.thread.service.ThreadService;
+import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
 import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.user.dto.UserAccountUpdateDTO;
 import kr.soft.autofeed.user.dto.UserLoginDTO;
@@ -27,8 +33,12 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ThreadRepository threadRepository;
     private final HashtagRepository hashtagRepository;
     private final UserHashtagRepository userHashtagRepository;
+    private final FollowRepository followRepository;
+    private final ThreadLikeRepository threadLikeRepository;
+    private final ThreadService threadService;
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -47,6 +57,31 @@ public class UserService {
         if(userRepository.existsByUserId(inputUserId)){
             return ResponseData.error(400, "이미 사용 중인 사용자 ID입니다.");
         }
+
+        return ResponseData.success();
+    }
+
+    @Transactional
+    public ResponseData delete(Long userIdx){
+        User user = userRepository.findById(userIdx)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+        user.setDelCheck(true);
+        user.setDelUser(user);
+
+        userHashtagRepository.findAllByUserUserIdx(userIdx)
+            .forEach(delHashtag -> delHashtag.setDelCheck(true));
+
+        followRepository.findAllByFollowerUserIdx(userIdx)
+            .forEach(follower -> follower.setDelCheck(true));
+
+        followRepository.findAllByFollowingUserIdx(userIdx)
+            .forEach(following -> following.setDelCheck(true));
+
+        threadLikeRepository.findAllByUserUserIdx(userIdx)
+            .forEach(like -> like.setDelCheck(true));
+
+        threadRepository.findAllByUserUserIdx(userIdx)
+                .forEach(thread -> threadService.threadDelete(thread.getThreadIdx()));
 
         return ResponseData.success();
     }
