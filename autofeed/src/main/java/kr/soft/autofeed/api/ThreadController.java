@@ -11,6 +11,7 @@ import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
 import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
 import kr.soft.autofeed.thread.service.ThreadService;
 import kr.soft.autofeed.util.FileUploadUtil;
+import kr.soft.autofeed.util.HangulFilterUtil;
 import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +34,26 @@ public class ThreadController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadService threadService;
 
-    @PostMapping("/topThreads")
+    @PostMapping("search/nomal")
+    public ResponseEntity<ResponseData> getSearchNomal(@RequestParam("inputStr") String inputStr) {
+        inputStr = HangulFilterUtil.removeLastIfHangul(inputStr);
+        ResponseData responseData = threadService.getSearchThreadResult(inputStr);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("search/hashtag")
+    public ResponseEntity<ResponseData> getSearchHashtag(@RequestParam("inputStr") String inputStr) {
+        ResponseData responseData = threadService.getSearchThreadResult(inputStr);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/feed/follow")
+    public ResponseEntity<ResponseData> getFollowingThreads(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = threadService.getFollowingThreads(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/page/feed/recommend")
     public ResponseEntity<ResponseData> getTopThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = threadService.getTopThreads(userIdx);
         return ResponseEntity.ok(responseData);

@@ -1,6 +1,8 @@
 package kr.soft.autofeed.domain;
 
 import jakarta.persistence.*;
+import kr.soft.autofeed.user.dto.UserSimpleProfileDTO;
+import kr.soft.autofeed.user.dto.UserProfileViewDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,34 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user")
+@SqlResultSetMapping(
+    name = "UserProfileViewMapping",
+    classes = @ConstructorResult(
+        targetClass = UserProfileViewDTO.class,
+        columns = {
+            @ColumnResult(name = "userIdx", type = Long.class),
+            @ColumnResult(name = "userName", type = String.class),
+            @ColumnResult(name = "userId", type = String.class),
+            @ColumnResult(name = "bio", type = String.class),
+            @ColumnResult(name = "userHashtag", type = String.class),
+            @ColumnResult(name = "profileImage", type = String.class),
+            @ColumnResult(name = "followerCount", type = Integer.class)
+        }
+    )
+)
+@SqlResultSetMapping(
+    name = "UserSimpleProfileMapping",
+    classes = @ConstructorResult(
+        targetClass = UserSimpleProfileDTO.class,
+        columns = {
+            @ColumnResult(name = "userIdx", type = Long.class),
+            @ColumnResult(name = "userId", type = String.class),
+            @ColumnResult(name = "userName", type = String.class),
+            @ColumnResult(name = "profileImage", type = String.class)
+        }
+    )
+)
+
 @Getter
 @Setter
 @NoArgsConstructor

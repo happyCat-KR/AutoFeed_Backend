@@ -23,13 +23,20 @@ import kr.soft.autofeed.domain.UserHashtagId;
 import kr.soft.autofeed.follow.dao.FollowRepository;
 import kr.soft.autofeed.hashtag.dao.HashtagRepository;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
+import kr.soft.autofeed.thread.dto.ThreadViewDTO;
 import kr.soft.autofeed.thread.service.ThreadService;
 import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
+import kr.soft.autofeed.user.dao.UserCostomRepository;
 import kr.soft.autofeed.user.dao.UserRepository;
+import kr.soft.autofeed.user.dto.SearchBoxDTO;
 import kr.soft.autofeed.user.dto.UserAccountUpdateDTO;
+import kr.soft.autofeed.user.dto.UserFollowCntDTO;
+import kr.soft.autofeed.user.dto.UserSimpleProfileDTO;
 import kr.soft.autofeed.user.dto.UserLoginDTO;
 import kr.soft.autofeed.user.dto.UserProfileUpdateDTO;
+import kr.soft.autofeed.user.dto.UserProfileViewDTO;
 import kr.soft.autofeed.user.dto.UserRegistDTO;
+import kr.soft.autofeed.util.HangulFilterUtil;
 import kr.soft.autofeed.util.ResponseData;
 import kr.soft.autofeed.util.UserProfileUtil;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +53,62 @@ public class UserService {
     private final ThreadLikeRepository threadLikeRepository;
     private final ThreadService threadService;
     private final UserActionService userActionService;
+    private final UserCostomRepository userCostomRepository;
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Transactional
+    public ResponseData getSearchBox(String inputStr) {
+
+        String filteredInput = HangulFilterUtil.removeLastIfHangul(inputStr);
+
+        List<String> hashtagList = userCostomRepository.findHashtagsByPrefix(filteredInput);
+        List<UserSimpleProfileDTO> userList = userCostomRepository.findUsersByUserIdPrefix(filteredInput);
+        userList.addAll(userCostomRepository.findUsersByHashtags(hashtagList));
+
+        SearchBoxDTO searchBoxDTO = new SearchBoxDTO(hashtagList, userList);
+        return ResponseData.success(searchBoxDTO);
+    }
+
+    @Transactional
+    public ResponseData getUserFollowingList(Long userIdx) {
+        List<UserSimpleProfileDTO> userFollowingList = userCostomRepository.findFollowingList(userIdx);
+        return ResponseData.success(userFollowingList);
+    }
+
+    @Transactional
+    public ResponseData getUserFollowerList(Long userIdx) {
+        List<UserSimpleProfileDTO> userFollowerList = userCostomRepository.findFollowerList(userIdx);
+        return ResponseData.success(userFollowerList);
+    }
+
+    @Transactional
+    public ResponseData getUserFollowCount(Long userIdx) {
+        UserFollowCntDTO userFollowCntDTO = new UserFollowCntDTO(userCostomRepository.countFollowers(userIdx),
+                userCostomRepository.countFollowings(userIdx));
+        return ResponseData.success(userFollowCntDTO);
+    }
+
+    @Transactional
+    public ResponseData getUserReplies(Long userIdx) {
+        List<ThreadViewDTO> userRepliesList = userCostomRepository.findUserReplies(userIdx);
+        return ResponseData.success(userRepliesList);
+    }
+
+    @Transactional
+    public ResponseData getUserThreads(Long userIdx) {
+        List<ThreadViewDTO> userThreadList = userCostomRepository.findUserThreads(userIdx);
+        return ResponseData.success(userThreadList);
+    }
+
+    @Transactional
+    public ResponseData getUserProfile(Long userIdx) {
+        UserProfileViewDTO userProfileView = userCostomRepository.findUserProfile(userIdx);
+        if (userProfileView == null) {
+            return ResponseData.error(404, "사용자를 찾을 수 없습니다.");
+        }
+        return ResponseData.success(userProfileView);
+    }
 
     @Transactional
     @Scheduled(cron = "0 * * * * *")

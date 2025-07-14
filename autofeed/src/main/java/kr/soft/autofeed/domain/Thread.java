@@ -20,19 +20,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import kr.soft.autofeed.thread.dto.ThreadSummaryDTO;
+import kr.soft.autofeed.thread.dto.ThreadViewDTO;
 
 @SqlResultSetMapping(
-    name = "ThreadSummaryMapping",
+    name = "ThreadViewMapping",
     classes = @ConstructorResult(
-        targetClass = ThreadSummaryDTO.class,
+        targetClass = ThreadViewDTO.class,
         columns = {
             @ColumnResult(name = "threadIdx", type = Long.class),
             @ColumnResult(name = "profileImage", type = String.class),
             @ColumnResult(name = "userId", type = String.class),
             @ColumnResult(name = "content", type = String.class),
             @ColumnResult(name = "fileUrls", type = String.class),
-            @ColumnResult(name = "likeCount", type = Integer.class)
+            @ColumnResult(name = "likeCount", type = Integer.class),
+            @ColumnResult(name = "commentCount", type = Integer.class)
         }
     )
 )

@@ -2,7 +2,10 @@ package kr.soft.autofeed.thread.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,14 +26,15 @@ import kr.soft.autofeed.domain.Thread;
 import kr.soft.autofeed.domain.ThreadHashtag;
 import kr.soft.autofeed.domain.ThreadHashtagId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
-import kr.soft.autofeed.thread.dao.ThreadSummaryRepository;
+import kr.soft.autofeed.thread.dao.ThreadCustomRepository;
 import kr.soft.autofeed.media.dao.MediaRepository;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
-import kr.soft.autofeed.thread.dto.ThreadSummaryDTO;
+import kr.soft.autofeed.thread.dto.ThreadViewDTO;
 import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
 import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
 import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.util.FileUploadUtil;
+import kr.soft.autofeed.util.HangulFilterUtil;
 import kr.soft.autofeed.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
@@ -46,10 +50,41 @@ public class ThreadService {
     final private ThreadLikeRepository threadLikeRepository;
     final private UserActionRepository userActionRepository;
     final private UserActionService userActionService;
-    private final ThreadSummaryRepository threadSummaryRepository;
+    private final ThreadCustomRepository threadCustomRepository;
 
+    @Transactional
+    public ResponseData getSearchThreadResult(String inputStr) {
+        System.out.println("Search input: " + inputStr);
+        List<ThreadViewDTO> hashtagResults = threadCustomRepository.findThreadsByHashtag(inputStr);
+        List<ThreadViewDTO> contentResults = threadCustomRepository.findThreadsByContentKeyword(inputStr);
+
+        // threadIdx 기준 중복 제거를 위해 Map 사용
+        Map<Long, ThreadViewDTO> mergedMap = new LinkedHashMap<>();
+
+        // hashtag 결과 먼저 넣기
+        for (ThreadViewDTO t : hashtagResults) {
+            mergedMap.put(t.getThreadIdx(), t);
+        }
+
+        // content 결과 중복 없이 추가
+        for (ThreadViewDTO t : contentResults) {
+            mergedMap.putIfAbsent(t.getThreadIdx(), t);
+        }
+
+        List<ThreadViewDTO> mergedList = new ArrayList<>(mergedMap.values());
+
+        return ResponseData.success(mergedList);
+    }
+
+    @Transactional
+    public ResponseData getFollowingThreads(Long userIdx) {
+        List<ThreadViewDTO> result = threadCustomRepository.findFollowingThreads(userIdx);
+        return ResponseData.success(result);
+    }
+
+    @Transactional
     public ResponseData getTopThreads(Long userIdx) {
-        List<ThreadSummaryDTO> result = threadSummaryRepository.findTopThreadsByUser(userIdx);
+        List<ThreadViewDTO> result = threadCustomRepository.findTopThreadsByUser(userIdx);
 
         return ResponseData.success(result);
     }

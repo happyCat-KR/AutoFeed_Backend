@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/user")
@@ -28,6 +30,48 @@ public class UserController {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
     private final UserService userService;
+
+    @PostMapping("/search")
+    public ResponseEntity<ResponseData> getSearchBox(@RequestParam("inputStr") String inputStr) {
+        ResponseData responseData = userService.getSearchBox(inputStr);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/count/follow")
+    public ResponseEntity<ResponseData> getUserFollowCount(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserFollowCount(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/list/following")
+    public ResponseEntity<ResponseData> getUserFollowing(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserFollowingList(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/list/follower")
+    public ResponseEntity<ResponseData> getUserFollower(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserFollowerList(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/replies")
+    public ResponseEntity<ResponseData> getUserReplies(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserReplies(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/threads")
+    public ResponseEntity<ResponseData> getUserThreads(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserThreads(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/profile")
+    public ResponseEntity<ResponseData> getUserProfile(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserProfile(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
 
     // 문장단어 추출 및 카테고리 분류
     @PostMapping("/classify")
