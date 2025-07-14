@@ -33,6 +33,12 @@ public class ThreadController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadService threadService;
 
+    @PostMapping("/topThreads")
+    public ResponseEntity<ResponseData> getTopThreads(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = threadService.getTopThreads(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
     // 게시글 작성
     @PostMapping(value = "/regist")
     public ResponseEntity<ResponseData> postRegist(MultipartHttpServletRequest request) throws IOException {
@@ -57,8 +63,8 @@ public class ThreadController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("/delete")    
-    public ResponseEntity<ResponseData> threadDelete(@RequestParam("threadIdx") Long threadIdx){
+    @PostMapping("/delete")
+    public ResponseEntity<ResponseData> threadDelete(@RequestParam("threadIdx") Long threadIdx) {
         ResponseData responseData = threadService.threadDelete(threadIdx);
 
         return ResponseEntity.ok(responseData);

@@ -3,6 +3,8 @@ package kr.soft.autofeed.follow.service;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import kr.soft.autofeed.UserAction.service.UserActionService;
+import kr.soft.autofeed.UserHashtag.dao.UserHashtagRepository;
 import kr.soft.autofeed.domain.Follow;
 import kr.soft.autofeed.domain.FollowId;
 import kr.soft.autofeed.domain.User;
@@ -18,6 +20,8 @@ public class FollowService {
 
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+    private final UserHashtagRepository userHashtagRepository;
+    private final UserActionService userActionService;
 
     @Transactional
     public ResponseData followRegist(FollowDTO followRegistDTO){
@@ -43,6 +47,14 @@ public class FollowService {
 
         followRepository.save(follow);
 
+        userHashtagRepository.findAllByUserUserIdx(following.getUserIdx())
+                .forEach(userHashtag -> {
+                    // 활동 기록 저장(팔로우)
+                    if(!userHashtag.isDelCheck()){
+                        userActionService.regist(follower, userHashtag.getHashtag(), "user_follow");
+                    }
+                });
+
         return ResponseData.success();
     }
 
@@ -59,6 +71,15 @@ public class FollowService {
         }
 
         follow.setDelCheck(true);
+
+
+        userHashtagRepository.findAllByUserUserIdx(followCancelDTO.getFollowingIdx())
+                .forEach(userHashtag -> {
+                    // 활동 기록 저장(팔로우)
+                    if(!userHashtag.isDelCheck()){
+                        userActionService.regist(follow.getFollower(), userHashtag.getHashtag(), "user_unfollow");
+                    }
+                });
 
         return ResponseData.success();
     }

@@ -4,7 +4,10 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import kr.soft.autofeed.domain.User;
+import kr.soft.autofeed.ThreadHashtag.dao.ThreadHashtagRepository;
+import kr.soft.autofeed.UserAction.service.UserActionService;
 import kr.soft.autofeed.domain.Thread;
+import kr.soft.autofeed.domain.ThreadHashtag;
 import kr.soft.autofeed.domain.ThreadLike;
 import kr.soft.autofeed.domain.ThreadLikeId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
@@ -21,6 +24,8 @@ public class ThreadLikeService {
     private final ThreadLikeRepository threadLikeRepository;
     private final UserRepository userRepository;
     private final ThreadRepository threadRepository;
+    private final ThreadHashtagRepository threadHashtagRepository;
+    private final UserActionService userActionService;
 
     @Transactional
     public ResponseData LikeRegist(LikeDTO likeRegistDTO) {
@@ -49,6 +54,12 @@ public class ThreadLikeService {
 
         threadLikeRepository.save(threadLike);
 
+        threadHashtagRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
+                .forEach(threadHashtag -> {
+                    // 활동 기록 저장(좋아요)
+                    userActionService.regist(user, threadHashtag.getHashtag(), "post_like");
+                });
+                    
         return ResponseData.success();
     }
 
@@ -71,6 +82,12 @@ public class ThreadLikeService {
         }
 
         threadLike.setDelCheck(true);
+
+        threadHashtagRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
+                .forEach(threadHashtag -> {
+                    // 활동 기록 저장(좋아요 취소)
+                    userActionService.regist(user, threadHashtag.getHashtag(), "post_unlike");
+                });
 
         return ResponseData.success();
 

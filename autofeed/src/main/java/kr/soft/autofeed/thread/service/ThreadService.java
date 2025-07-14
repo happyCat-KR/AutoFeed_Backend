@@ -10,16 +10,23 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import kr.soft.autofeed.domain.User;
+import kr.soft.autofeed.domain.UserAction;
 import kr.soft.autofeed.hashtag.dao.HashtagRepository;
+import kr.soft.autofeed.ActionType.dao.ActionTypeRepository;
 import kr.soft.autofeed.ThreadHashtag.dao.ThreadHashtagRepository;
+import kr.soft.autofeed.UserAction.dao.UserActionRepository;
+import kr.soft.autofeed.UserAction.service.UserActionService;
+import kr.soft.autofeed.domain.ActionType;
 import kr.soft.autofeed.domain.Hashtag;
 import kr.soft.autofeed.domain.Media;
 import kr.soft.autofeed.domain.Thread;
 import kr.soft.autofeed.domain.ThreadHashtag;
 import kr.soft.autofeed.domain.ThreadHashtagId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
+import kr.soft.autofeed.thread.dao.ThreadSummaryRepository;
 import kr.soft.autofeed.media.dao.MediaRepository;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
+import kr.soft.autofeed.thread.dto.ThreadSummaryDTO;
 import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
 import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
 import kr.soft.autofeed.user.dao.UserRepository;
@@ -37,6 +44,15 @@ public class ThreadService {
     final private HashtagRepository hashtagRepository;
     final private ThreadHashtagRepository threadHashtagRepository;
     final private ThreadLikeRepository threadLikeRepository;
+    final private UserActionRepository userActionRepository;
+    final private UserActionService userActionService;
+    private final ThreadSummaryRepository threadSummaryRepository;
+
+    public ResponseData getTopThreads(Long userIdx) {
+        List<ThreadSummaryDTO> result = threadSummaryRepository.findTopThreadsByUser(userIdx);
+
+        return ResponseData.success(result);
+    }
 
     @Transactional
     public ResponseData threadRestore(Long threadIdx) {
@@ -65,20 +81,29 @@ public class ThreadService {
     // 매시간 정각에 실행
     @Transactional
     @Scheduled(cron = "0 * * * * *")
-    public void threadCleanInsert(){
+    public void threadCleanInsert() {
         LocalDateTime twoHoursAgo = LocalDateTime.now().minusMinutes(2);
         List<Thread> threads = threadRepository.findAllForCleanup(twoHoursAgo);
 
-        for(Thread thread : threads){
+        for (Thread thread : threads) {
+            if (thread.getContent().equals("삭제된 게시글"))
+                continue;
+
             thread.setContent("삭제된 게시글");
+
             threadHashtagRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
-                .forEach(threadHashtag -> threadHashtag.setDelCheck(true));
+                    .forEach(threadHashtag -> {
+                        // 활동 기록 저장(삭제)
+                        userActionService.regist(thread.getUser(), threadHashtag.getHashtag(), "post_delete");
+                        // 해시태그 삭제
+                        threadHashtag.setDelCheck(true);
+                    });
 
             mediaRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
-                .forEach(media -> media.setDelCheck(true));
+                    .forEach(media -> media.setDelCheck(true));
 
             threadLikeRepository.findAllByThreadThreadIdx(thread.getThreadIdx())
-                .forEach(like -> like.setDelCheck(true));
+                    .forEach(like -> like.setDelCheck(true));
         }
 
     }
@@ -100,6 +125,11 @@ public class ThreadService {
         for (String hashtagName : threadRegistDTO.getHashtagName()) {
             // 3. thread_hastag 테이블 객체 생성 및 반환
             threadHashtagRepository.save(threadHashtagInsert(savedThread, hashtagName));
+
+            // 4. 활동 기록 저장
+            Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
+                    .orElseThrow(() -> new IllegalArgumentException("해쉬태그가 없습니다."));
+            userActionService.regist(savedThread.getUser(), hashtag, "post_create");
         }
 
         return ResponseData.success();

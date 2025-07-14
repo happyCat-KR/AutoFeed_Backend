@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FollowDTO {
-    private long followerIdx;
-    private long followingIdx;
+    private Long followerIdx;
+    private Long followingIdx;
 }

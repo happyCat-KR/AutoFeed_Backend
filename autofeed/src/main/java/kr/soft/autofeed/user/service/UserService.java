@@ -2,7 +2,9 @@ package kr.soft.autofeed.user.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import kr.soft.autofeed.UserAction.service.UserActionService;
 import kr.soft.autofeed.UserHashtag.dao.UserHashtagRepository;
 import kr.soft.autofeed.domain.Hashtag;
 import kr.soft.autofeed.domain.User;
@@ -42,6 +45,7 @@ public class UserService {
     private final FollowRepository followRepository;
     private final ThreadLikeRepository threadLikeRepository;
     private final ThreadService threadService;
+    private final UserActionService userActionService;
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -69,7 +73,6 @@ public class UserService {
 
             threadLikeRepository.findAllByUserUserIdx(user.getUserIdx())
                     .forEach(like -> like.setDelCheck(true));
-
 
         }
     }
@@ -220,29 +223,44 @@ public class UserService {
         }
 
         // 기존 해시태그 전부 soft delete
-        userHashtagRepository.findAllByUserUserIdx(user.getUserIdx())
-                .forEach(uh -> uh.setDelCheck(true));
-        if (userProfileUpdateDTO.getHashtagName() != null) {
-            for (String hashtagName : userProfileUpdateDTO.getHashtagName()) {
-                Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
-                        .orElseThrow(() -> new IllegalArgumentException("해당 해쉬태그가 없습니다."));
+        List<UserHashtag> existingHashtags = userHashtagRepository.findAllByUserUserIdx(user.getUserIdx());
+        Set<String> incomingHashtagSet = new HashSet<>(userProfileUpdateDTO.getHashtagName());
 
-                UserHashtagId userHashtagId = new UserHashtagId(user.getUserIdx(), hashtag.getHashtagIdx());
+        // 먼저 remove 기록 처리 (DTO에 없는 것들만)
+        for (UserHashtag uh : existingHashtags) {
+            String name = uh.getHashtag().getHashtagName();
+            if (!incomingHashtagSet.contains(name) && !uh.isDelCheck()) {
+                userActionService.regist(uh.getUser(), uh.getHashtag(), "user_hashtag_remove");
+                uh.setDelCheck(true);
+            }
+        }
 
-                UserHashtag userHashtag = userHashtagRepository.findById(userHashtagId)
-                        .map(existing -> {
+        // 이후 add 처리
+        for (String hashtagName : userProfileUpdateDTO.getHashtagName()) {
+            Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 해쉬태그가 없습니다."));
+
+            UserHashtagId userHashtagId = new UserHashtagId(user.getUserIdx(), hashtag.getHashtagIdx());
+
+            UserHashtag userHashtag = userHashtagRepository.findById(userHashtagId)
+                    .map(existing -> {
+                        if (existing.isDelCheck()) {
                             existing.setDelCheck(false);
-                            return existing;
-                        })
-                        .orElseGet(() -> UserHashtag.builder()
+                            userActionService.regist(user, hashtag, "user_hashtag_add");
+                        }
+                        return existing;
+                    })
+                    .orElseGet(() -> {
+                        UserHashtag newOne = UserHashtag.builder()
                                 .userHashtagId(userHashtagId)
                                 .user(user)
                                 .hashtag(hashtag)
-                                .build());
+                                .build();
+                        userActionService.regist(user, hashtag, "user_hashtag_add");
+                        return newOne;
+                    });
 
-                userHashtagRepository.save(userHashtag);
-
-            }
+            userHashtagRepository.save(userHashtag);
         }
         return ResponseData.success();
 
