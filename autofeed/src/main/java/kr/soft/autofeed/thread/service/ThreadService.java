@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import jakarta.websocket.Decoder.Text;
 import kr.soft.autofeed.domain.User;
 import kr.soft.autofeed.domain.UserAction;
 import kr.soft.autofeed.hashtag.dao.HashtagRepository;
@@ -38,6 +39,7 @@ import kr.soft.autofeed.user.dao.UserRepository;
 import kr.soft.autofeed.util.FileUploadUtil;
 import kr.soft.autofeed.util.HangulFilterUtil;
 import kr.soft.autofeed.util.ResponseData;
+import kr.soft.autofeed.util.TextClassifier;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -174,6 +176,9 @@ public class ThreadService {
     @Transactional
     public ResponseData threadRegist(ThreadRegistDTO threadRegistDTO) throws IOException {
 
+        // 작성 내용 카테고리분류
+        String category = TextClassifier.classifyText(threadRegistDTO.getContent());
+
         // 1. thread 테이블 객체 생성 및 반환.
         Thread savedThread = threadRepository.save(threadInsert(threadRegistDTO));
 
@@ -191,6 +196,17 @@ public class ThreadService {
 
             // 4. 활동 기록 저장
             Hashtag hashtag = hashtagRepository.findByHashtagName(hashtagName)
+                    .orElseThrow(() -> new IllegalArgumentException("해쉬태그가 없습니다."));
+            userActionService.regist(savedThread.getUser(), hashtag, "post_create");
+
+            if(hashtagName.equals(category)) {
+                category = "중복";
+            }
+        }
+        System.out.println("카테고리 분류 결과: " + category);
+        // 5. 카테고리 활동 기록 저장(게시글작성시 카테고리 분류가 되면 해당 카테고리로 활동 기록 저장 *이미 해시태그로 저장된 경우는 제외)
+        if(!category.equals("분류불가") && !category.equals("중복")) {
+            Hashtag hashtag = hashtagRepository.findByHashtagName(category)
                     .orElseThrow(() -> new IllegalArgumentException("해쉬태그가 없습니다."));
             userActionService.regist(savedThread.getUser(), hashtag, "post_create");
         }

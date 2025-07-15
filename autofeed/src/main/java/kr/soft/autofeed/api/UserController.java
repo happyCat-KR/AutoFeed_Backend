@@ -80,13 +80,6 @@ public class UserController {
         return ResponseEntity.ok(responseData);
     }
 
-    // 문장단어 추출 및 카테고리 분류
-    @PostMapping("/classify")
-    public ResponseEntity<ResponseData> classify(@RequestBody String sentence) {
-        ResponseData responseData = TextClassifier.classifyText(sentence);
-        return ResponseEntity.ok(responseData);
-    }
-
     @PostMapping("/restore")
     public ResponseEntity<ResponseData> threadRestore(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.restore(userIdx);
@@ -112,6 +105,17 @@ public class UserController {
         logger.info(userRegistDTO.toString());
         ResponseData responseData = userService.regist(userRegistDTO);
         return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseData> postMethodName(HttpServletResponse response) {
+        // userIdx 쿠키 삭제 (만료)
+        Cookie cookie = new Cookie("userIdx", null);
+        cookie.setPath("/"); // 로그인 때 설정한 path와 동일하게
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0); // 즉시 만료
+        response.addCookie(cookie);
+        return ResponseEntity.ok(ResponseData.success());
     }
 
     // 로그인

@@ -1,6 +1,5 @@
 package kr.soft.autofeed.thread.dto;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;

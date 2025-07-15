@@ -13,6 +13,7 @@ import kr.soft.autofeed.thread.service.ThreadService;
 import kr.soft.autofeed.util.FileUploadUtil;
 import kr.soft.autofeed.util.HangulFilterUtil;
 import kr.soft.autofeed.util.ResponseData;
+import kr.soft.autofeed.util.TextClassifier;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
@@ -33,6 +34,12 @@ public class ThreadController {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadService threadService;
+
+    @PostMapping("/category")
+    public String getCategory(@RequestParam("sentence") String sentence) {
+        // 카테고리 분류 기능 호출
+        return TextClassifier.classifyText(sentence);
+    }
 
     @PostMapping("/write/profile")
     public ResponseEntity<ResponseData> threadWriteUserProfile(@RequestParam("userIdx") Long userIdx) {
