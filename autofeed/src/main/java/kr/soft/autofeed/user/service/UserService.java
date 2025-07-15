@@ -178,7 +178,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseData restore(Long userIdx) {
+    public void restore(Long userIdx) {
         User user = userRepository.findById(userIdx)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
         user.setDelCheck(false);
@@ -187,8 +187,6 @@ public class UserService {
 
         threadRepository.findAllByUserUserIdx(userIdx)
                 .forEach(thread -> threadService.threadRestore(thread.getThreadIdx()));
-
-        return ResponseData.success();
     }
 
     @Transactional
@@ -223,7 +221,7 @@ public class UserService {
                         return ResponseData.error(400, "비밀번호가 서로 다름!");
                     }
                     if (user.getDelCheck()) {
-                        return ResponseData.error(400, "탈퇴한 회원입니다.");
+                        restore(user.getUserIdx());
                     }
 
                     return ResponseData.success(user.getUserIdx());

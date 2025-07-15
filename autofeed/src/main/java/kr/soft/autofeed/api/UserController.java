@@ -80,13 +80,6 @@ public class UserController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("/restore")
-    public ResponseEntity<ResponseData> threadRestore(@RequestParam("userIdx") Long userIdx) {
-        ResponseData responseData = userService.restore(userIdx);
-
-        return ResponseEntity.ok(responseData);
-    }
-
     @GetMapping("/check/email-phone")
     public ResponseEntity<ResponseData> emailPhoneCheck(@RequestParam("inputEmailPhone") String inputEmailPhone) {
         ResponseData responseData = userService.emailPhoneCheck(inputEmailPhone);
