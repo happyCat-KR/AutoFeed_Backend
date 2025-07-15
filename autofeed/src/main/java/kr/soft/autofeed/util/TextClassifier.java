@@ -1,34 +1,42 @@
 package kr.soft.autofeed.util;
 
+import kr.soft.autofeed.domain.Hashtag;
+import kr.soft.autofeed.hashtag.dao.HashtagRepository;
+import kr.soft.autofeed.hashtag.service.HashtagService;
+import kr.soft.autofeed.relatedWord.dao.RelatedWordRepository;
+import kr.soft.autofeed.relatedWord.service.RelatedWordService;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Service;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
-
-/***
- * 카테고리 구분 기능
- */
+@Service
+@RequiredArgsConstructor
 public class TextClassifier {
 
-    private static final Map<String, List<String>> categories = new HashMap<>();
-
-    static {
-        categories.put("음식", Arrays.asList("음식", "밥", "점심", "저녁", "아침", "식사", "한식", "중식", "일식", "양식", "패스트푸드", "치킨", "피자", "햄버거", "라면"));
-        categories.put("운동", Arrays.asList("운동", "헬스", "헬스장", "러닝", "달리기", "마라톤", "요가", "필라테스", "수영", "자전거"));
-        categories.put("여행", Arrays.asList("여행", "관광", "여행지", "비행기", "기차", "버스", "배", "항공권", "비자", "여권"));
-        categories.put("영화감상", Arrays.asList("영화", "관람", "시사회", "예매", "팝콘", "배우", "감독", "장르", "드라마", "코미디"));
-        categories.put("쇼핑", Arrays.asList("쇼핑", "구매", "온라인쇼핑", "오프라인", "백화점", "마트", "할인", "세일", "쿠폰", "적립금"));
-    }
+    private final HashtagService hashtagService;
+    private final RelatedWordService relatedWordService;
+    private final HashtagRepository hashtagRepository;
 
 
-    
+    public String classifyText(String sentence) {
+        // DB에 저장된 카테고리명 리스트 가져오기 (해시태그 이름)
+        List<String> categories = hashtagService.findAllCategoryNames();
 
-    public static String classifyText(String sentence) {
         Map<String, Integer> scores = new HashMap<>();
 
-        for (Map.Entry<String, List<String>> entry : categories.entrySet()) {
-            String category = entry.getKey();
+        for (String category : categories) {
+            // 카테고리명에 해당하는 관련 단어 리스트 가져오기
+            Hashtag hashtag = hashtagRepository.findByHashtagName(category)
+                    .orElseThrow(() -> new IllegalArgumentException("해시태그가 존재하지 않습니다: " + category));
+
+            List<String> relatedWords = relatedWordService.getWordsByHashtagIdx(hashtag.getHashtagIdx());
+
             int score = 0;
-            for (String keyword : entry.getValue()) {
-                if (sentence.contains(keyword)) {
+            for (String word : relatedWords) {
+                if (sentence.contains(word)) {
                     score++;
                 }
             }

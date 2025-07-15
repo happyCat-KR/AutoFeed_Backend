@@ -55,6 +55,7 @@ public class ThreadService {
     final private UserActionRepository userActionRepository;
     final private UserActionService userActionService;
     private final ThreadCustomRepository threadCustomRepository;
+    private final TextClassifier textClassifier;
 
     @Transactional
     public ResponseData threadWriteUserProfile(Long userIdx) {
@@ -177,7 +178,7 @@ public class ThreadService {
     public ResponseData threadRegist(ThreadRegistDTO threadRegistDTO) throws IOException {
 
         // 작성 내용 카테고리분류
-        String category = TextClassifier.classifyText(threadRegistDTO.getContent());
+        String category = textClassifier.classifyText(threadRegistDTO.getContent());
 
         // 1. thread 테이블 객체 생성 및 반환.
         Thread savedThread = threadRepository.save(threadInsert(threadRegistDTO));

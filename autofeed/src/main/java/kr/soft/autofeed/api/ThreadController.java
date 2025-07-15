@@ -34,11 +34,12 @@ public class ThreadController {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadService threadService;
+    final private TextClassifier textClassifier;
 
     @PostMapping("/category")
     public String getCategory(@RequestParam("sentence") String sentence) {
         // 카테고리 분류 기능 호출
-        return TextClassifier.classifyText(sentence);
+        return textClassifier.classifyText(sentence);
     }
 
     @PostMapping("/write/profile")
