@@ -20,8 +20,9 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/user")
@@ -52,6 +53,12 @@ public class UserController {
     @PostMapping("page/list/follower")
     public ResponseEntity<ResponseData> getUserFollower(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserFollowerList(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/media-threads")
+    public ResponseEntity<ResponseData> getUserMediaThreads(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = userService.getUserMediaThreads(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
@@ -109,9 +116,19 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<ResponseData> login(@RequestBody UserLoginDTO userLoginDTO) {
+    public ResponseEntity<ResponseData> login(@RequestBody UserLoginDTO userLoginDTO, HttpServletResponse response) {
         logger.info(userLoginDTO.toString());
         ResponseData responseData = userService.login(userLoginDTO);
+
+        if (responseData.getCode() == 200 && responseData.getData() != null) {
+            Long userIdx = Long.valueOf(responseData.getData().toString());
+            Cookie cookie = new Cookie("userIdx", userIdx.toString());
+            cookie.setPath("/"); // 전체 경로에 적용
+            cookie.setHttpOnly(true); // JS에서 접근 못하도록
+            cookie.setMaxAge(60 * 60 * 24 * 7); // 7일
+            response.addCookie(cookie);
+        }
+
         return ResponseEntity.ok(responseData);
     }
 

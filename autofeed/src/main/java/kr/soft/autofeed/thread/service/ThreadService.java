@@ -28,8 +28,10 @@ import kr.soft.autofeed.domain.ThreadHashtagId;
 import kr.soft.autofeed.thread.dao.ThreadRepository;
 import kr.soft.autofeed.thread.dao.ThreadCustomRepository;
 import kr.soft.autofeed.media.dao.MediaRepository;
+import kr.soft.autofeed.thread.dto.ThreadDetailViewDTO;
 import kr.soft.autofeed.thread.dto.ThreadRegistDTO;
 import kr.soft.autofeed.thread.dto.ThreadViewDTO;
+import kr.soft.autofeed.thread.dto.WriteUserProfileDTO;
 import kr.soft.autofeed.thread.dto.ThreadUpdateDTO;
 import kr.soft.autofeed.threadLike.dao.ThreadLikeRepository;
 import kr.soft.autofeed.user.dao.UserRepository;
@@ -51,6 +53,32 @@ public class ThreadService {
     final private UserActionRepository userActionRepository;
     final private UserActionService userActionService;
     private final ThreadCustomRepository threadCustomRepository;
+
+    @Transactional
+    public ResponseData threadWriteUserProfile(Long userIdx) {
+        User user = userRepository.findById(userIdx)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        WriteUserProfileDTO writeUserProfileDTO = new WriteUserProfileDTO(
+                user.getUserIdx(),
+                user.getUserId(),
+                user.getProfileImage()
+        );
+        return ResponseData.success(writeUserProfileDTO);
+    }
+
+    @Transactional
+    public ResponseData getRepliesView(Long parentIdx) {
+        List<ThreadViewDTO> replies = threadCustomRepository.findRepliesOfThread(parentIdx);
+        return ResponseData.success(replies);
+    }
+
+    @Transactional
+    public ResponseData getDetailThread(Long threadIdx) {
+        ThreadViewDTO thread = threadCustomRepository.findDetailThread(threadIdx);
+        List<ThreadViewDTO> replies = threadCustomRepository.findRepliesOfThread(threadIdx);
+        ThreadDetailViewDTO detailView = new ThreadDetailViewDTO(thread, replies);
+        return ResponseData.success(detailView);
+    }
 
     @Transactional
     public ResponseData getSearchThreadResult(String inputStr) {

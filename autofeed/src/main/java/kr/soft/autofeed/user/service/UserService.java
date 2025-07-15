@@ -58,6 +58,12 @@ public class UserService {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Transactional
+    public ResponseData getUserMediaThreads(Long userIdx) {
+        List<ThreadViewDTO> userThreadList = userCostomRepository.findUserMediaThread(userIdx);
+        return ResponseData.success(userThreadList);
+    }
+
+    @Transactional
     public ResponseData getSearchBox(String inputStr) {
 
         String filteredInput = HangulFilterUtil.removeLastIfHangul(inputStr);
@@ -220,7 +226,7 @@ public class UserService {
                         return ResponseData.error(400, "탈퇴한 회원입니다.");
                     }
 
-                    return ResponseData.success();
+                    return ResponseData.success(user.getUserIdx());
                 })
                 .orElse(ResponseData.error(400, "아이디가 존재하지 않습니다."));
 

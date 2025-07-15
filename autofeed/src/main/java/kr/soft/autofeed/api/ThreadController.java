@@ -34,6 +34,24 @@ public class ThreadController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     final private ThreadService threadService;
 
+    @PostMapping("/write/profile")
+    public ResponseEntity<ResponseData> threadWriteUserProfile(@RequestParam("userIdx") Long userIdx) {
+        ResponseData responseData = threadService.threadWriteUserProfile(userIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/replies")
+    public ResponseEntity<ResponseData> getRepliesView(@RequestParam("parentIdx") Long parentIdx) {
+        ResponseData responseData = threadService.getRepliesView(parentIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("page/detail")
+    public ResponseEntity<ResponseData> getDetailThread(@RequestParam("threadIdx") Long threadIdx) {
+        ResponseData responseData = threadService.getDetailThread(threadIdx);
+        return ResponseEntity.ok(responseData);
+    }
+
     @PostMapping("search/nomal")
     public ResponseEntity<ResponseData> getSearchNomal(@RequestParam("inputStr") String inputStr) {
         inputStr = HangulFilterUtil.removeLastIfHangul(inputStr);

@@ -143,4 +143,66 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                 .getResultList();
     }
 
+
+    @Override
+    public ThreadViewDTO findDetailThread(Long threadIdx) {
+        String sql = """
+        WITH RECURSIVE reply_tree AS (
+            SELECT thread_idx, parent_idx
+            FROM thread
+            WHERE parent_idx = :threadIdx
+            UNION ALL
+            SELECT t.thread_idx, t.parent_idx
+            FROM thread t
+            JOIN reply_tree rt ON t.parent_idx = rt.thread_idx
+        )
+        SELECT 
+            t.thread_idx AS threadIdx,
+            u.profile_image AS profileImage,
+            u.user_id AS userId,
+            t.content AS content,
+            GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
+            COUNT(DISTINCT tl.user_idx) AS likeCount,
+            (SELECT COUNT(*) FROM reply_tree) AS commentCount
+        FROM USER u
+        LEFT JOIN thread t ON u.user_idx = t.user_idx
+        LEFT JOIN media m ON t.thread_idx = m.thread_idx
+        LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+        WHERE t.thread_idx = :threadIdx AND t.parent_idx IS NULL AND t.del_check = 0
+        GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
+        ORDER BY likeCount DESC
+    """;
+        return (ThreadViewDTO) em.createNativeQuery(sql, "ThreadViewMapping")
+                .setParameter("threadIdx", threadIdx)
+                .getSingleResult();
+    }
+
+
+     @Override
+    public List<ThreadViewDTO> findRepliesOfThread(Long parentIdx) {
+        String sql = """
+        SELECT 
+            t.thread_idx AS threadIdx,
+            u.profile_image AS profileImage,
+            u.user_id AS userId,
+            t.content AS content,
+            GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
+            COUNT(DISTINCT tl.user_idx) AS likeCount,
+            (SELECT COUNT(*) FROM thread c WHERE c.parent_idx = t.thread_idx) AS commentCount
+        FROM USER u
+        LEFT JOIN thread t ON u.user_idx = t.user_idx
+        LEFT JOIN media m ON t.thread_idx = m.thread_idx
+        LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+        WHERE t.thread_idx IN (
+            SELECT thread_idx FROM thread WHERE parent_idx = :parentIdx
+        ) AND t.del_check = 0
+        GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
+        ORDER BY likeCount DESC
+    """;
+        return em.createNativeQuery(sql, "ThreadViewMapping")
+                .setParameter("parentIdx", parentIdx)
+                .getResultList();
+    }
+
+
 }

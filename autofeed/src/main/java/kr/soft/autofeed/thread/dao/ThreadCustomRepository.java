@@ -10,6 +10,8 @@ public interface ThreadCustomRepository {
 
     List<ThreadViewDTO> findThreadsByHashtag(String hashtags);
     List<ThreadViewDTO> findThreadsByContentKeyword(String userIdPrefix);
+    ThreadViewDTO findDetailThread(Long threadIdx);
+    List<ThreadViewDTO> findRepliesOfThread(Long parentIdx);
     
 }
 

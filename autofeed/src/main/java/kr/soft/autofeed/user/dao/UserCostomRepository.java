@@ -17,4 +17,5 @@ public interface UserCostomRepository {
     List<String> findHashtagsByPrefix(String prefix);
     List<UserSimpleProfileDTO> findUsersByUserIdPrefix(String userIdPrefix);
     List<UserSimpleProfileDTO> findUsersByHashtags(List<String> hashtags);
+    List<ThreadViewDTO> findUserMediaThread(Long userIdx);
 }

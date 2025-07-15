@@ -184,4 +184,33 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                 .setParameter("hashtags", hashtags)
                 .getResultList();
     }
+
+    @Override
+    public List<ThreadViewDTO> findUserMediaThread(Long userIdx) {
+        String sql = """
+                    SELECT
+                    t.thread_idx AS threadIdx,
+                    u.profile_image AS profileImage,
+                    u.user_id AS userId,
+                    t.content AS content,
+                    GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
+                    COUNT(DISTINCT tl.user_idx) AS likeCount,
+                    (SELECT COUNT(*) FROM thread c WHERE c.parent_idx = t.thread_idx) AS commentCount
+                FROM USER u
+                LEFT JOIN thread t ON u.user_idx = t.user_idx
+                LEFT JOIN media m ON t.thread_idx = m.thread_idx
+                LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                WHERE t.thread_idx IN (SELECT thread_idx
+                FROM thread
+                WHERE user_idx = :userIdx
+                ) AND t.parent_idx IS NULL AND t.del_check = 0
+                GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
+                HAVING fileUrls IS NOT null
+                ORDER BY likeCount DESC;
+                                """;
+        ;
+        return em.createNativeQuery(sql, "ThreadViewMapping")
+                .setParameter("userIdx", userIdx)
+                .getResultList();
+    }
 }
