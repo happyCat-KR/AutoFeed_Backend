@@ -23,7 +23,7 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                            u.user_name AS userName,
                            u.user_id AS userId,
                            u.bio AS bio,
-                           GROUP_CONCAT(DISTINCT h.hashtag_name) AS userHashtag,
+                           COALESCE(GROUP_CONCAT(DISTINCT h.hashtag_name), '') AS userHashtag,
                            u.profile_image AS profileImage,
                             (
                                 SELECT COUNT(f2.follower_id)
@@ -32,7 +32,7 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                             ) AS followerCount
                     FROM USER u
                     LEFT JOIN user_hashtag uh ON u.user_idx = uh.user_idx
-                    RIGHT JOIN hashtag h ON uh.hashtag_idx = h.hashtag_idx
+                    LEFT JOIN hashtag h ON uh.hashtag_idx = h.hashtag_idx
                     LEFT JOIN follow f ON u.user_idx = f.following_id AND f.del_check = 0
                     WHERE u.user_idx = :userIdx
                     GROUP BY u.user_idx

@@ -38,43 +38,43 @@ public class UserController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/count/follow")
+    @GetMapping("page/count/follow")
     public ResponseEntity<ResponseData> getUserFollowCount(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserFollowCount(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/list/following")
+    @GetMapping("page/list/following")
     public ResponseEntity<ResponseData> getUserFollowing(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserFollowingList(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/list/follower")
+    @GetMapping("page/list/follower")
     public ResponseEntity<ResponseData> getUserFollower(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserFollowerList(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/media-threads")
+    @GetMapping("page/media-threads")
     public ResponseEntity<ResponseData> getUserMediaThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserMediaThreads(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/replies")
+    @GetMapping("page/replies")
     public ResponseEntity<ResponseData> getUserReplies(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserReplies(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/threads")
+    @GetMapping("page/threads")
     public ResponseEntity<ResponseData> getUserThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserThreads(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/profile")
+    @GetMapping("page/profile")
     public ResponseEntity<ResponseData> getUserProfile(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = userService.getUserProfile(userIdx);
         return ResponseEntity.ok(responseData);
@@ -127,6 +127,17 @@ public class UserController {
         }
 
         return ResponseEntity.ok(responseData);
+    }
+
+    // 현재 로그인한 유저를 확인
+    @GetMapping("/check/login")
+    public ResponseEntity<ResponseData> getCurrentUser(
+            @CookieValue(value = "userIdx", required = false) String userIdx) {
+        if (userIdx != null) {
+            return ResponseEntity.ok(new ResponseData(200, "로그인 유지", userIdx));
+        } else {
+            return ResponseEntity.ok(new ResponseData(401, "로그인 정보 없음", null));
+        }
     }
 
     @PostMapping("/delete")

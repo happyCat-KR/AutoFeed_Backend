@@ -328,6 +328,5 @@ public class UserService {
             userHashtagRepository.save(userHashtag);
         }
         return ResponseData.success();
-
     }
 }
