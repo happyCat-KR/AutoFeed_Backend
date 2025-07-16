@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -42,19 +43,19 @@ public class ThreadController {
         return textClassifier.classifyText(sentence);
     }
 
-    @PostMapping("/write/profile")
+    @GetMapping("/write/profile")
     public ResponseEntity<ResponseData> threadWriteUserProfile(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = threadService.threadWriteUserProfile(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/replies")
+    @GetMapping("page/replies")
     public ResponseEntity<ResponseData> getRepliesView(@RequestParam("parentIdx") Long parentIdx) {
         ResponseData responseData = threadService.getRepliesView(parentIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/detail")
+    @GetMapping("page/detail")
     public ResponseEntity<ResponseData> getDetailThread(@RequestParam("threadIdx") Long threadIdx) {
         ResponseData responseData = threadService.getDetailThread(threadIdx);
         return ResponseEntity.ok(responseData);
@@ -73,13 +74,13 @@ public class ThreadController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/feed/follow")
+    @GetMapping("page/feed/follow")
     public ResponseEntity<ResponseData> getFollowingThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = threadService.getFollowingThreads(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("/page/feed/recommend")
+    @GetMapping("/page/feed/recommend")
     public ResponseEntity<ResponseData> getTopThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = threadService.getTopThreads(userIdx);
         return ResponseEntity.ok(responseData);

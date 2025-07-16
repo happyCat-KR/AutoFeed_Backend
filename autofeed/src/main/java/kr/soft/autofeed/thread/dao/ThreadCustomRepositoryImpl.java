@@ -168,7 +168,7 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
         LEFT JOIN thread t ON u.user_idx = t.user_idx
         LEFT JOIN media m ON t.thread_idx = m.thread_idx
         LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
-        WHERE t.thread_idx = :threadIdx AND t.parent_idx IS NULL AND t.del_check = 0
+        WHERE t.thread_idx = :threadIdx AND t.del_check = 0
         GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
         ORDER BY likeCount DESC
     """;
