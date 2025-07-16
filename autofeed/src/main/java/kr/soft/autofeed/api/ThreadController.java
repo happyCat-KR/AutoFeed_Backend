@@ -48,13 +48,13 @@ public class ThreadController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/replies")
+    @GetMapping("page/replies")
     public ResponseEntity<ResponseData> getRepliesView(@RequestParam("parentIdx") Long parentIdx) {
         ResponseData responseData = threadService.getRepliesView(parentIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/detail")
+    @GetMapping("page/detail")
     public ResponseEntity<ResponseData> getDetailThread(@RequestParam("threadIdx") Long threadIdx) {
         ResponseData responseData = threadService.getDetailThread(threadIdx);
         return ResponseEntity.ok(responseData);
@@ -73,13 +73,13 @@ public class ThreadController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("page/feed/follow")
+    @GetMapping("page/feed/follow")
     public ResponseEntity<ResponseData> getFollowingThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = threadService.getFollowingThreads(userIdx);
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("/page/feed/recommend")
+    @GetMapping("/page/feed/recommend")
     public ResponseEntity<ResponseData> getTopThreads(@RequestParam("userIdx") Long userIdx) {
         ResponseData responseData = threadService.getTopThreads(userIdx);
         return ResponseEntity.ok(responseData);
