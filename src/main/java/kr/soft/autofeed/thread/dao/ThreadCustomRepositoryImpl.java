@@ -116,7 +116,7 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                             ) AS limited_hashtags
                         )
                         GROUP BY th.thread_idx
-                    ) AND t.parent_idx IS NULL
+                    ) AND t.parent_idx IS NULL AND t.del_check = 0
                     GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
                 """, "ThreadViewMapping")
@@ -151,7 +151,7 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                             FROM follow
                             WHERE follower_id = :userIdx AND del_check = 0
                         )
-                    ) AND t.parent_idx IS NULL
+                    ) AND t.parent_idx IS NULL AND t.del_check = 0
                     GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
                 """, "ThreadViewMapping")
@@ -186,13 +186,9 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
         LEFT JOIN thread t ON u.user_idx = t.user_idx
         LEFT JOIN media m ON t.thread_idx = m.thread_idx
         LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
-<<<<<<< HEAD:autofeed/src/main/java/kr/soft/autofeed/thread/dao/ThreadCustomRepositoryImpl.java
-        WHERE t.thread_idx = :threadIdx AND t.del_check = 0
-=======
         LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
         LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
-        WHERE t.thread_idx = :threadIdx AND t.parent_idx IS NULL AND t.del_check = 0
->>>>>>> c5241d9 (hashtagName, userIdx ThreadViewDTO에 추가):src/main/java/kr/soft/autofeed/thread/dao/ThreadCustomRepositoryImpl.java
+        WHERE t.thread_idx = :threadIdx AND t.del_check = 0
         GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
         ORDER BY likeCount DESC
     """;

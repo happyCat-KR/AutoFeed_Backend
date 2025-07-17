@@ -20,7 +20,7 @@ public class FileUploadUtil {
     public static List<String> saveImages(List<MultipartFile> files, Long userIdx) throws IOException {
         List<String> savedUrls = new ArrayList<>();
 
-        List<String> allowedExtensions = List.of(".jpg", ".jpeg", ".png", ".gif", ".webp");
+        List<String> allowedExtensions = List.of(".jpg", ".jpeg", ".png", ".gif", ".webp", "jfif");
 
         File saveDir = UPLOAD_DIR.toFile();
         if (!saveDir.exists()) {

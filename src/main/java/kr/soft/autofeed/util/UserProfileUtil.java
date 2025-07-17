@@ -18,7 +18,7 @@ public class UserProfileUtil {
     private static final String URL_PREFIX = "/images/user/";
 
     public static String saveImage(MultipartFile file, Long userIdx) throws IOException {
-        List<String> allowedExtensions = List.of(".jpg", ".jpeg", ".png");
+        List<String> allowedExtensions = List.of(".jpg", ".jpeg", ".png", "jfif");
 
         File saveDir = UPLOAD_DIR.toFile();
         if (!saveDir.exists()) {
