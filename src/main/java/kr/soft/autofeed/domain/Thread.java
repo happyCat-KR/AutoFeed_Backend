@@ -29,6 +29,8 @@ import kr.soft.autofeed.thread.dto.ThreadViewDTO;
         columns = {
             @ColumnResult(name = "threadIdx", type = Long.class),
             @ColumnResult(name = "profileImage", type = String.class),
+            @ColumnResult(name = "hashtagName", type = String.class),
+            @ColumnResult(name = "userIdx", type = String.class),
             @ColumnResult(name = "userId", type = String.class),
             @ColumnResult(name = "content", type = String.class),
             @ColumnResult(name = "fileUrls", type = String.class),

@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 public class ThreadViewDTO {
     private Long threadIdx;
     private String profileImage;
+    private String hashtagName;
+    private String userIdx;
     private String userId;
     private String content;
     private String fileUrls;

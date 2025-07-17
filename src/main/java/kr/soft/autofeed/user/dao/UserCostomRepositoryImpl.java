@@ -47,6 +47,8 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                     SELECT
                         t.thread_idx AS threadIdx,
                         u.profile_image AS profileImage,
+                        GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                        u.user_idx AS userIdx,
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -56,6 +58,8 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                     LEFT JOIN thread t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.thread_idx = m.thread_idx
                     LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                    LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                    LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                     WHERE t.user_idx = :userIdx AND t.parent_idx IS NULL AND t.del_check = 0
                     GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
@@ -70,6 +74,8 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                     SELECT
                         t.thread_idx AS threadIdx,
                         u.profile_image AS profileImage,
+                        GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                        u.user_idx AS userIdx,
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -79,6 +85,8 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                     LEFT JOIN thread t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.thread_idx = m.thread_idx
                     LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                    LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                    LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                     WHERE t.user_idx = :userIdx AND t.parent_idx IS NOT NULL AND t.del_check = 0
                     GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
@@ -191,6 +199,8 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                     SELECT
                     t.thread_idx AS threadIdx,
                     u.profile_image AS profileImage,
+                    GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                    u.user_idx AS userIdx,
                     u.user_id AS userId,
                     t.content AS content,
                     GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -200,6 +210,8 @@ public class UserCostomRepositoryImpl implements UserCostomRepository {
                 LEFT JOIN thread t ON u.user_idx = t.user_idx
                 LEFT JOIN media m ON t.thread_idx = m.thread_idx
                 LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                 WHERE t.thread_idx IN (SELECT thread_idx
                 FROM thread
                 WHERE user_idx = :userIdx

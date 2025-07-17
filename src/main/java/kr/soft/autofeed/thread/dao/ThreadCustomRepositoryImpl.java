@@ -20,6 +20,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     SELECT
                         t.thread_idx AS threadIdx,
                         u.profile_image AS profileImage,
+                        GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                        u.user_idx AS userIdx,
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -29,6 +31,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     LEFT JOIN thread t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.thread_idx = m.thread_idx
                     LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                    LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                    LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                     WHERE t.thread_idx IN (
                         SELECT thread_idx FROM thread_hashtag WHERE hashtag_idx = (
                             SELECT hashtag_idx FROM hashtag WHERE hashtag_name = :hashtagName
@@ -50,6 +54,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     SELECT
                         t.thread_idx AS threadIdx,
                         u.profile_image AS profileImage,
+                        GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                        u.user_idx AS userIdx,
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -59,6 +65,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     LEFT JOIN thread t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.thread_idx = m.thread_idx
                     LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                    LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                    LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                     WHERE t.thread_idx IN (
                         SELECT thread_idx FROM thread WHERE content LIKE CONCAT('%', :keyword, '%')
                     )
@@ -79,6 +87,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     SELECT
                         t.thread_idx AS threadIdx,
                         u.profile_image AS profileImage,
+                        GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                        u.user_idx AS userIdx,
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -88,6 +98,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     LEFT JOIN thread t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.thread_idx = m.thread_idx
                     LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                    LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                    LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                     WHERE t.thread_idx IN (
                         SELECT th.thread_idx
                         FROM thread_hashtag th
@@ -118,6 +130,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     SELECT
                         t.thread_idx AS threadIdx,
                         u.profile_image AS profileImage,
+                        GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+                        u.user_idx AS userIdx,
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -127,6 +141,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
                     LEFT JOIN thread t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.thread_idx = m.thread_idx
                     LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+                    LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+                    LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
                     WHERE t.thread_idx IN (
                         SELECT thread_idx
                         FROM thread
@@ -159,6 +175,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
         SELECT 
             t.thread_idx AS threadIdx,
             u.profile_image AS profileImage,
+            GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+            u.user_idx AS userIdx,
             u.user_id AS userId,
             t.content AS content,
             GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -168,7 +186,13 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
         LEFT JOIN thread t ON u.user_idx = t.user_idx
         LEFT JOIN media m ON t.thread_idx = m.thread_idx
         LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+<<<<<<< HEAD:autofeed/src/main/java/kr/soft/autofeed/thread/dao/ThreadCustomRepositoryImpl.java
         WHERE t.thread_idx = :threadIdx AND t.del_check = 0
+=======
+        LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+        LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
+        WHERE t.thread_idx = :threadIdx AND t.parent_idx IS NULL AND t.del_check = 0
+>>>>>>> c5241d9 (hashtagName, userIdx ThreadViewDTO에 추가):src/main/java/kr/soft/autofeed/thread/dao/ThreadCustomRepositoryImpl.java
         GROUP BY t.thread_idx, u.profile_image, u.user_id, t.content
         ORDER BY likeCount DESC
     """;
@@ -184,6 +208,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
         SELECT 
             t.thread_idx AS threadIdx,
             u.profile_image AS profileImage,
+            GROUP_CONCAT(DISTINCT h.hashtag_name) AS hashtagName,
+            u.user_idx AS userIdx,
             u.user_id AS userId,
             t.content AS content,
             GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
@@ -193,6 +219,8 @@ public class ThreadCustomRepositoryImpl implements ThreadCustomRepository {
         LEFT JOIN thread t ON u.user_idx = t.user_idx
         LEFT JOIN media m ON t.thread_idx = m.thread_idx
         LEFT JOIN thread_like tl ON t.thread_idx = tl.thread_idx AND tl.del_check = 0
+        LEFT JOIN thread_hashtag th ON t.thread_idx = th.thread_idx
+        LEFT JOIN hashtag h ON th.hashtag_idx = h.hashtag_idx
         WHERE t.thread_idx IN (
             SELECT thread_idx FROM thread WHERE parent_idx = :parentIdx
         ) AND t.del_check = 0
